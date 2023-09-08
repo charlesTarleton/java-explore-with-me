@@ -1,9 +1,9 @@
 version: '3.1'
 services:
-  stats-service:
-    build: stats-service
-    image: stats-service
-    container_name: stats-service
+  stats-server:
+    build: stats-service/stats-server
+    image: stats-server
+    container_name: stats-server
     ports:
       - "9090:9090"
     environment:
