@@ -43,7 +43,7 @@ public class StatsClient {
                                                           String path,
                                                           @Nullable Map<String, Object> parameters,
                                                           @Nullable T body) {
-        HttpEntity<T> requestEntity = new HttpEntity<>(body);
+        HttpEntity<T> requestEntity = new HttpEntity<>(body, null);
 
         ResponseEntity<Object> ewmServerResponse;
         try {
