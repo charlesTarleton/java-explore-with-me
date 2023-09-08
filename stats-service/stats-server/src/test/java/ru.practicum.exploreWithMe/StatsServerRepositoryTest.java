@@ -26,9 +26,9 @@ public class StatsServerRepositoryTest {
     @BeforeEach
     void setUp() {
         statisticRepository.save(new EndpointHit(null, "PC", "/event/55", "1", LocalDateTime.now()));
-        statisticRepository.save(new EndpointHit(null, "IoS", "/event/56", "2", LocalDateTime.now()));
-        statisticRepository.save(new EndpointHit(null, "PC", "/event/54", "3", LocalDateTime.now()));
-        statisticRepository.save(new EndpointHit(null, "PC", "/event/55", "4", LocalDateTime.now()));
+        statisticRepository.save(new EndpointHit(null, "IoS", "/event/55", "2", LocalDateTime.now()));
+        statisticRepository.save(new EndpointHit(null, "PC", "/event/55", "3", LocalDateTime.now()));
+        statisticRepository.save(new EndpointHit(null, "PC", "/event/56", "4", LocalDateTime.now()));
         statisticRepository.save(new EndpointHit(null, "PC", "/user", "1", LocalDateTime.now()));
         start = LocalDateTime.now().minusDays(1);
         end = LocalDateTime.now().plusDays(1);
@@ -36,8 +36,8 @@ public class StatsServerRepositoryTest {
 
     @Test
     void shouldGetStatisticIfUniqueAndWithArray() {
-        String uri = "/event";
-        viewStatsList = statisticRepository.getStatisticIfUniqueAndWithArray(start, end, uri);
+        String[] uris = new String[]{"/event/55", "/event/56"};
+        viewStatsList = statisticRepository.getStatisticIfUniqueAndWithArray(start, end, uris);
         assertEquals(3, viewStatsList.size());
         assertEquals("PC", viewStatsList.get(0).getApp());
         assertEquals("/event/55", viewStatsList.get(0).getUri());

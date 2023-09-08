@@ -13,7 +13,6 @@ import ru.practicum.exploreWithMe.utils.EndpointHitMapper;
 import ru.practicum.exploreWithMe.utils.ViewStatsMapper;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -45,20 +44,15 @@ public class StatsServerServiceImpl implements StatsServerService {
         boolean isArrayExist = uris != null && uris.length != 0;
         List<ViewStats> viewStatsList;
         if (isArrayExist && unique) {
-            viewStatsList = new ArrayList<>();
-            for (String uri : uris) {
-                viewStatsList.addAll(statisticRepository.getStatisticIfUniqueAndWithArray(start, end, uri));
-            }
+            viewStatsList = statisticRepository.getStatisticIfUniqueAndWithArray(start, end, uris);
+
         } else if (!isArrayExist && unique) {
             viewStatsList = statisticRepository.getStatisticIfUniqueAndWithoutArray(start, end);
         } else if (!isArrayExist && !unique) {
             viewStatsList = statisticRepository.getStatisticIfNotUniqueAndWithoutArray(start, end);
         } else {
-            viewStatsList = new ArrayList<>();
-            for (String uri : uris) {
-                viewStatsList.addAll(statisticRepository.getStatisticIfNotUniqueAndWithArray(start, end, uri));
-            } // К сожалению, в данном случае я не вижу способов избежать множественности запросов
-        } // т.к. IN и нативные запросы PostgreSQL нельзя полностью или частично совместить с LOWER/CONCAT(string, '%')
-        return viewStatsList.stream().map(ViewStatsMapper::toDto).collect(Collectors.toList()); // и ViewStats
+            viewStatsList = statisticRepository.getStatisticIfNotUniqueAndWithArray(start, end, uris);
+        }
+        return viewStatsList.stream().map(ViewStatsMapper::toDto).collect(Collectors.toList());
     }
 }

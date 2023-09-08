@@ -14,12 +14,12 @@ public interface StatsServerRepository extends JpaRepository<EndpointHit, Long> 
     @Query("SELECT new ru.practicum.exploreWithMe.model.ViewStats(eh.app, eh.uri, COUNT(DISTINCT eh.ip)) " +
             "FROM EndpointHit AS eh " +
             "WHERE (eh.timestamp BETWEEN :start AND :end) " +
-            "AND (LOWER(eh.uri) LIKE LOWER(CONCAT(:uri, '%')))" +
+            "AND (eh.uri IN :uris) " +
             "GROUP BY eh.app, eh.uri " +
             "ORDER BY COUNT(DISTINCT eh.ip) DESC")
     List<ViewStats> getStatisticIfUniqueAndWithArray(@Param("start") LocalDateTime start,
                                                      @Param("end") LocalDateTime end,
-                                                     @Param("uri") String uri);
+                                                     @Param("uris") String[] uris);
 
     @Query("SELECT new ru.practicum.exploreWithMe.model.ViewStats(eh.app, eh.uri, COUNT(DISTINCT eh.ip)) " +
             "FROM EndpointHit AS eh " +
@@ -40,10 +40,10 @@ public interface StatsServerRepository extends JpaRepository<EndpointHit, Long> 
     @Query("SELECT new ru.practicum.exploreWithMe.model.ViewStats(eh.app, eh.uri, COUNT(eh.ip)) " +
             "FROM EndpointHit AS eh " +
             "WHERE (eh.timestamp BETWEEN :start AND :end) " +
-            "AND (LOWER(eh.uri) LIKE LOWER(CONCAT(:uri, '%')))" +
+            "AND (eh.uri IN :uris) " +
             "GROUP BY eh.app, eh.uri " +
             "ORDER BY COUNT(eh.ip) DESC")
     List<ViewStats> getStatisticIfNotUniqueAndWithArray(@Param("start") LocalDateTime start,
                                                         @Param("end") LocalDateTime end,
-                                                        @Param("uri") String uri);
+                                                        @Param("uris") String[] uris);
 }
