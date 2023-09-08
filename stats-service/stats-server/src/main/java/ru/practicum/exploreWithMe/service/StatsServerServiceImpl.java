@@ -58,7 +58,7 @@ public class StatsServerServiceImpl implements StatsServerService {
             for (String uri : uris) {
                 viewStatsList.addAll(statisticRepository.getStatisticIfNotUniqueAndWithArray(start, end, uri));
             } // К сожалению, в данном случае я не вижу способов избежать множественности запросов
-        }//т.к. IN и нативные запросы PostgreSQL нельзя полностью или частично совместить с LOWER и CONCAT(string, '%')
+        } // т.к. IN и нативные запросы PostgreSQL нельзя полностью или частично совместить с LOWER/CONCAT(string, '%')
         return viewStatsList.stream().map(ViewStatsMapper::toDto).collect(Collectors.toList()); // и ViewStats
     }
 }

@@ -21,6 +21,7 @@ public class StatsServerRepositoryTest {
     private StatsServerRepository statisticRepository;
     private LocalDateTime start;
     private LocalDateTime end;
+    private List<ViewStats> viewStatsList;
 
     @BeforeEach
     void setUp() {
@@ -36,19 +37,19 @@ public class StatsServerRepositoryTest {
     @Test
     void shouldGetStatisticIfUniqueAndWithArray() {
         String uri = "/event";
-        List<ViewStats> ViewStatsList = statisticRepository.getStatisticIfUniqueAndWithArray(start, end, uri);
-        assertEquals(3, ViewStatsList.size());
-        assertEquals("PC", ViewStatsList.get(0).getApp());
-        assertEquals("/event/55", ViewStatsList.get(0).getUri());
-        assertEquals(2, ViewStatsList.get(0).getHits());
+        viewStatsList = statisticRepository.getStatisticIfUniqueAndWithArray(start, end, uri);
+        assertEquals(3, viewStatsList.size());
+        assertEquals("PC", viewStatsList.get(0).getApp());
+        assertEquals("/event/55", viewStatsList.get(0).getUri());
+        assertEquals(2, viewStatsList.get(0).getHits());
     }
 
     @Test
     void shouldGetStatisticIfUniqueAndWithoutArray() {
-        List<ViewStats> ViewStatsList = statisticRepository.getStatisticIfUniqueAndWithoutArray(start, end);
-        assertEquals(4, ViewStatsList.size());
-        assertEquals("PC", ViewStatsList.get(0).getApp());
-        assertEquals("/event/55", ViewStatsList.get(0).getUri());
-        assertEquals(2, ViewStatsList.get(0).getHits());
+        viewStatsList = statisticRepository.getStatisticIfUniqueAndWithoutArray(start, end);
+        assertEquals(4, viewStatsList.size());
+        assertEquals("PC", viewStatsList.get(0).getApp());
+        assertEquals("/event/55", viewStatsList.get(0).getUri());
+        assertEquals(2, viewStatsList.get(0).getHits());
     }
 }
