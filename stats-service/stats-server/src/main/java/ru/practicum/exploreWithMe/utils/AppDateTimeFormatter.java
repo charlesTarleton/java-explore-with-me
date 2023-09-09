@@ -9,13 +9,13 @@ import java.time.format.DateTimeFormatter;
 @Getter
 @UtilityClass
 public class AppDateTimeFormatter {
-    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     public LocalDateTime toDateTime(String localDateTimeStr) {
-        return LocalDateTime.parse(localDateTimeStr, formatter);
+        return LocalDateTime.parse(localDateTimeStr, FORMATTER);
     }
 
     public String toString(LocalDateTime localDateTime) {
-        return localDateTime.format(formatter);
+        return localDateTime.format(FORMATTER);
     }
 }

@@ -7,6 +7,7 @@ import java.util.Map;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
@@ -18,23 +19,24 @@ import ru.practicum.exploreWithMe.dto.EndpointHitDto;
 @Slf4j
 @RequiredArgsConstructor
 public class StatsClient {
-    private static final String URL = "http://stats-service:9090";
+    @Value("${client.api.url}")
+    private String url;
     private static final String CLIENT_LOG = "Клиент статистики получил запрос на {}{}";
     private final RestTemplate rest;
 
     private ResponseEntity<Object> saveStatistic(EndpointHitDto endpointHitDto) {
         log.info(CLIENT_LOG, "сохранение элемента статистики: ", endpointHitDto);
-        return makeAndSendRequest(HttpMethod.POST, URL + "/hit", null, endpointHitDto);
+        return makeAndSendRequest(HttpMethod.POST, url + "/hit", null, endpointHitDto);
     }
 
-    protected ResponseEntity<Object> getStatistic(LocalDateTime start, LocalDateTime end,
+    private ResponseEntity<Object> getStatistic(LocalDateTime start, LocalDateTime end,
                                                   String[] uris, Boolean unique) {
         log.info(CLIENT_LOG, "получение элементов статистики с параметрами:",
                 "\nstart " + start + "\nend " + end + "\nuris " + Arrays.toString(uris) + "\nunique" + unique);
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         String startStr = start.format(formatter);
         String endStr = end.format(formatter);
-        return makeAndSendRequest(HttpMethod.GET, URL + "/stats",
+        return makeAndSendRequest(HttpMethod.GET, url + "/stats",
                 Map.of("start", startStr, "end", endStr, "uris", uris, "unique", unique),
                 null);
     }

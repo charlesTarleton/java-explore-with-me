@@ -8,6 +8,7 @@ import ru.practicum.exploreWithMe.dto.EndpointHitDto;
 import ru.practicum.exploreWithMe.dto.ViewStatsDto;
 import ru.practicum.exploreWithMe.service.StatsServerService;
 
+import javax.validation.Valid;
 import java.util.Arrays;
 import java.util.List;
 
@@ -20,7 +21,7 @@ public class StatsServerController {
 
     @PostMapping("/hit")
     @ResponseStatus(HttpStatus.CREATED)
-    public void saveStatistic(@RequestBody EndpointHitDto endpointHitDto) {
+    public void saveStatistic(@Valid @RequestBody EndpointHitDto endpointHitDto) {
         log.info(CONTROLLER_LOG, "сохранение элемента статистики: ", endpointHitDto);
         statisticService.saveStatistic(endpointHitDto);
     }
@@ -29,7 +30,7 @@ public class StatsServerController {
     public List<ViewStatsDto> getStatistic(@RequestParam(value = "start") String startStr,
                                            @RequestParam(value = "end") String endStr,
                                            @RequestParam(required = false) String[] uris,
-                                           @RequestParam(required = false, defaultValue = "false") boolean unique) {
+                                           @RequestParam(defaultValue = "false") boolean unique) {
         log.info(CONTROLLER_LOG, "получение элементов статистики с параметрами:",
                 "\nstart " + startStr + "\nend " + endStr + "\nuris " + Arrays.toString(uris) + "\nunique" + unique);
         return statisticService.getStatistic(startStr, endStr, uris, unique);
