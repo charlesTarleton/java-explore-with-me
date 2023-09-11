@@ -24,7 +24,7 @@ public class ControllerAdvice {
 
     @ExceptionHandler({Throwable.class})
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public ErrorResponse fiveHundredErrorHandle(final Exception exception) {
+    public ErrorResponse fiveHundredErrorHandle(final Throwable exception) {
         log.warn(ERROR_500, exception);
         return new ErrorResponse(ERROR_500, ERROR_500_DESCRIPTION);
     }
