@@ -14,13 +14,11 @@ public class AppDateTimeFormatter {
 
     public LocalDateTime toDateTime(String localDateTimeStr) {
         log.info("Начата процедура преобразования строки в дату: {}", localDateTimeStr);
-        LocalDateTime localDateTime = LocalDateTime.now();
         try {
-           LocalDateTime.parse(localDateTimeStr, FORMATTER);
-        } catch (DateTimeParseException e) {
+            return LocalDateTime.parse(localDateTimeStr, FORMATTER);
+        } catch (DateTimeParseException | NullPointerException e) {
             return null;
         }
-        return localDateTime;
     }
 
     public String toString(LocalDateTime localDateTime) {
