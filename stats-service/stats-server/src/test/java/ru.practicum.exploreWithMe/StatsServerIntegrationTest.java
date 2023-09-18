@@ -25,11 +25,11 @@ public class StatsServerIntegrationTest {
 
     @Test
     void shouldGetOwnerBookingsIntegration() {
-        statisticService.saveStatistic(new EndpointHitDto("app1", "uri1", "ip",
+        statisticService.saveStatistic(new EndpointHitDto("uri1", "ip",
                 LocalDateTime.now().minusDays(1)));
-        statisticService.saveStatistic(new EndpointHitDto("app1", "uri2", "ip",
+        statisticService.saveStatistic(new EndpointHitDto("uri2", "ip",
                 LocalDateTime.now().minusDays(2)));
-        statisticService.saveStatistic(new EndpointHitDto("app1", "uri1", "ip",
+        statisticService.saveStatistic(new EndpointHitDto("uri1", "ip",
                 LocalDateTime.now().plusDays(1)));
         List<ViewStatsDto> viewStatsDtoList = statisticService.getStatistic(
                 AppDateTimeFormatter.toString(LocalDateTime.now().minusDays(4)),

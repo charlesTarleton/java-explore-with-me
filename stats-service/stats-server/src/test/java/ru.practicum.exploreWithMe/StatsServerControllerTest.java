@@ -47,7 +47,7 @@ public class StatsServerControllerTest {
 
     @Test
     void shouldSaveStatistic() throws Exception {
-        EndpointHitDto endpointHitDto = new EndpointHitDto("app", "uri", "ip", LocalDateTime.now());
+        EndpointHitDto endpointHitDto = new EndpointHitDto("uri", "ip", LocalDateTime.now());
         mvc.perform(post("/hit")
                         .content(mapper.writeValueAsString(endpointHitDto))
                         .characterEncoding(StandardCharsets.UTF_8)
