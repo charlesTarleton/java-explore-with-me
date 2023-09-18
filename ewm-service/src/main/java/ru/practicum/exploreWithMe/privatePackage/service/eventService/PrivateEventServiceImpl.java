@@ -39,7 +39,7 @@ import java.util.stream.Collectors;
 @Slf4j
 @RequiredArgsConstructor
 @Transactional
-public class PrivateEventServiceImpl implements PrivateEventService{
+public class PrivateEventServiceImpl implements PrivateEventService {
     private final EventRepository eventRepository;
     private final UserRepository userRepository;
     private final RequestRepository requestRepository;

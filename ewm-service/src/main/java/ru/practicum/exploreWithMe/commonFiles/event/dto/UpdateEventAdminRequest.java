@@ -35,6 +35,6 @@ public class UpdateEventAdminRequest {
 
     private AdminAction stateAction;
 
-    @Length(min= 3, max = 120)
+    @Length(min = 3, max = 120)
     private String title;
 }

@@ -126,6 +126,7 @@ public class PrivateRequestServiceImpl implements PrivateRequestService {
             throw new UserIsNotEventInitiatorException("Пользователь является инициатором события");
         }
     }
+
     private void checkUserIsRequester(Long userId, Long requesterId) {
         log.info("Начата процедура проверки соответствия пользователя просителю с id: {}", requesterId);
         if (userId.longValue() != requesterId.longValue()) {
