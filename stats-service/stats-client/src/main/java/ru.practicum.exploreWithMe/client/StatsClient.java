@@ -19,7 +19,7 @@ import ru.practicum.exploreWithMe.dto.EndpointHitDto;
 
 @Slf4j
 @RequiredArgsConstructor
-@Service
+//@Service
 public class StatsClient {
     @Value("${client.api.url}")
     private final String url;
