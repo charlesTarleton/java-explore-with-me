@@ -42,7 +42,7 @@ public class AdminUserControllerTest {
 
         mvc.perform(get("/admin/users")
                         .param("ids", ids)
-                        .param("from", "1" )
+                        .param("from", "1")
                         .param("size", "12"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[*].id", containsInAnyOrder(2)))
