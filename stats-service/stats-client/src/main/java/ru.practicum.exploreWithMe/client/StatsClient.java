@@ -22,7 +22,7 @@ import ru.practicum.exploreWithMe.dto.EndpointHitDto;
 @Service
 public class StatsClient {
     @Value("${client.api.url}")
-    private final String url;
+    private String url;
     private static final String CLIENT_LOG = "Клиент статистики получил запрос на {}{}";
     private final RestTemplate rest;
 

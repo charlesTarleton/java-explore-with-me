@@ -5,12 +5,14 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.hibernate.validator.constraints.Length;
 import ru.practicum.exploreWithMe.commonFiles.event.model.Location;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import java.time.LocalDateTime;
+
+import static ru.practicum.exploreWithMe.commonFiles.utils.AppDateTimeFormatter.pattern;
 
 @Setter
 @Getter
@@ -18,18 +20,18 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class NewEventDto {
     @NotBlank
-    @Length(min = 20, max = 2000)
+    @Size(min = 20, max = 2000)
     private String annotation;
 
     @NotNull
     private Long category;
 
     @NotBlank
-    @Length(min = 20, max = 7000)
+    @Size(min = 20, max = 7000)
     private String description;
 
     @NotNull
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @JsonFormat(pattern = pattern)
     private LocalDateTime eventDate;
 
     @NotNull
@@ -42,6 +44,6 @@ public class NewEventDto {
     private Boolean requestModeration;
 
     @NotBlank
-    @Length(min = 3, max = 120)
+    @Size(min = 3, max = 120)
     private String title;
 }

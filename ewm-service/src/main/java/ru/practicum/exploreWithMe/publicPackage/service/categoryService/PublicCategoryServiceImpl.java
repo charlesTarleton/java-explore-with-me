@@ -23,7 +23,7 @@ public class PublicCategoryServiceImpl implements PublicCategoryService {
 
     public Set<CategoryDto> getCategories(Integer from, Integer size) {
         log.info(SERVICE_LOG, "получение списка категорий", "");
-        return categoryRepository.findAll(new ExploreWithMePageable(from, size, Sort.unsorted()))
+        return categoryRepository.findAll(new ExploreWithMePageable(from, size, Sort.by("id").ascending()))
                 .map(CategoryMapper::toDto)
                 .toSet();
     }

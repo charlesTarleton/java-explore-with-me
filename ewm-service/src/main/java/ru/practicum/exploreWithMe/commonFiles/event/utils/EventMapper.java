@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 @UtilityClass
 @Slf4j
 public class EventMapper {
-    public Event toEvent(Long eventId, Category category, NewEventDto eventDto, Integer confirmedRequests,
+    public Event toEvent(Long eventId, Category category, NewEventDto eventDto, Long confirmedRequests,
                          User user, Integer views) {
         log.info("Начата процедура преобразования нового ДТО в событие: {}", eventDto);
         if (eventDto.getPaid() == null) {
@@ -97,6 +97,33 @@ public class EventMapper {
     public Event toEvent(Long eventId, Category category, UpdateEventAdminRequest eventDto,
                          Event oldEvent, EventState eventState) {
         log.info("Начата процедура преобразования измененного администратором ДТО в событие: {}", eventDto);
+        if (eventDto.getAnnotation() == null) {
+            eventDto.setAnnotation(oldEvent.getAnnotation());
+        }
+        if (eventDto.getCategory() == null) {
+            eventDto.setCategory(oldEvent.getCategory().getId());
+        }
+        if (eventDto.getDescription() == null) {
+            eventDto.setDescription(oldEvent.getDescription());
+        }
+        if (eventDto.getEventDate() == null) {
+            eventDto.setEventDate(oldEvent.getEventDate());
+        }
+        if (eventDto.getLocation() == null) {
+            eventDto.setLocation(oldEvent.getLocation());
+        }
+        if (eventDto.getPaid() == null) {
+            eventDto.setPaid(oldEvent.getPaid());
+        }
+        if (eventDto.getParticipantLimit() == null) {
+            eventDto.setParticipantLimit(oldEvent.getParticipantLimit());
+        }
+        if (eventDto.getRequestModeration() == null) {
+            eventDto.setRequestModeration(oldEvent.getRequestModeration());
+        }
+        if (eventDto.getTitle() == null) {
+            eventDto.setTitle(oldEvent.getTitle());
+        }
         return new Event(
                 eventId,
                 eventDto.getAnnotation(),

@@ -11,6 +11,8 @@ import ru.practicum.exploreWithMe.commonFiles.user.dto.UserShortDto;
 
 import java.time.LocalDateTime;
 
+import static ru.practicum.exploreWithMe.commonFiles.utils.AppDateTimeFormatter.pattern;
+
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
@@ -20,14 +22,14 @@ public class EventFullDto {
 
     private CategoryDto category;
 
-    private Integer confirmedRequests;
+    private Long confirmedRequests;
 
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @JsonFormat(pattern = pattern)
     private LocalDateTime createdOn;
 
     private String description;
 
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @JsonFormat(pattern = pattern)
     private LocalDateTime eventDate;
 
     private Long id;
@@ -40,7 +42,7 @@ public class EventFullDto {
 
     private Long participantLimit;
 
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @JsonFormat(pattern = pattern)
     private LocalDateTime publishedOn;
 
     private Boolean requestModeration;

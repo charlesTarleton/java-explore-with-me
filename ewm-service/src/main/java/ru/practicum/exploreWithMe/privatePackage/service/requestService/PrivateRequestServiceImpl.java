@@ -53,13 +53,13 @@ public class PrivateRequestServiceImpl implements PrivateRequestService {
         checkUserIsEventInitiator(userId, event.getInitiator().getId());
         checkIsUserRepeatRequest(userId, eventId);
         checkEventIsPublished(event);
-        checkEventIsLimited(event);
         Request request;
-        if (!event.getRequestModeration() || event.getParticipantLimit() != 0) {
+        if (!event.getRequestModeration() || event.getParticipantLimit() == 0) {
             request = RequestMapper.toRequest(user, event, RequestStatus.CONFIRMED);
             event.setConfirmedRequests(event.getConfirmedRequests() + 1);
             eventRepository.save(event);
         } else {
+            checkEventIsLimited(event);
             request = RequestMapper.toRequest(user, event, RequestStatus.PENDING);
         }
         return RequestMapper.toDto(requestRepository.save(request));

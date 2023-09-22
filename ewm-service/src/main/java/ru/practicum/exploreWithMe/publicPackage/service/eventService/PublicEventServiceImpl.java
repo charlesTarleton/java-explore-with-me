@@ -24,17 +24,19 @@ import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
 @Slf4j
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
+@Transactional
 public class PublicEventServiceImpl implements PublicEventService {
     private final EventRepository eventRepository;
     private final StatsClient client;
     private static final String SERVICE_LOG = "Публичный сервис событий получил запрос на {}{}";
 
+    @Transactional(readOnly = true)
     public List<EventShortDto> getEventsWithFiltration(String text, Long[] categories, Boolean paid,
                                                        String rangeStartStr, String rangeEndStr,
                                                        Boolean onlyAvailable, EventSort sort, Integer from,
@@ -42,40 +44,49 @@ public class PublicEventServiceImpl implements PublicEventService {
         log.info(SERVICE_LOG, "поиск событий по фильтру пользователя", "");
         client.saveStatistic(new EndpointHitDto(request.getRequestURI(),
                 request.getRemoteAddr(), LocalDateTime.now()));
+        Pageable pageable = new ExploreWithMePageable(from, size, Sort.unsorted());
+        if (sort != null) {
+            switch (sort) {
+                case EVENT_DATE:
+                    pageable = new ExploreWithMePageable(from, size, Sort.by("eventDate").descending());
+                    break;
+                case VIEWS:
+                    pageable = new ExploreWithMePageable(from, size, Sort.by("views").descending());
+            }
+        }
         LocalDateTime rangeStart = AppDateTimeFormatter.toDateTime(rangeStartStr);
         LocalDateTime rangeEnd = AppDateTimeFormatter.toDateTime(rangeEndStr);
+        List<Event> eventList = eventRepository.getEventsWithFiltration(text, Set.of(categories),
+                paid, onlyAvailable, pageable);
         if (rangeStart == null || rangeEnd == null) {
-            rangeStart = null;
-            rangeEnd = null;
+            LocalDateTime currentTime = LocalDateTime.now();
+            return eventList.stream()
+                    .filter(event -> event.getEventDate().isAfter(currentTime))
+                    .map(EventMapper::toShortDto)
+                    .collect(Collectors.toList());
+        } else {
+            checkSearchDateTime(rangeStart, rangeEnd);
+            return eventList.stream()
+                    .filter(event -> event.getEventDate().isAfter(rangeStart) &&
+                            event.getEventDate().isBefore(rangeEnd))
+                    .map(EventMapper::toShortDto)
+                    .collect(Collectors.toList());
         }
-        checkSearchDateTime(rangeStart, rangeEnd);
-        Pageable pageable;
-        switch (sort) {
-            case EVENT_DATE:
-                pageable = new ExploreWithMePageable(from, size, Sort.by("eventDate").descending());
-                break;
-            case VIEWS:
-                pageable = new ExploreWithMePageable(from, size, Sort.by("views").descending());
-                break;
-            default:
-                pageable = new ExploreWithMePageable(from, size, Sort.unsorted());
-                break;
-        }
-        return eventRepository.getEventsWithFiltration(text, categories, paid, rangeStart, rangeEnd,
-                onlyAvailable, pageable).stream()
-                .map(EventMapper::toShortDto)
-                .collect(Collectors.toList());
     }
 
     public EventFullDto getEvent(Long eventId, HttpServletRequest request) {
         client.saveStatistic(new EndpointHitDto(request.getRequestURI(),
                 request.getRemoteAddr(), LocalDateTime.now()));
-        return EventMapper.toFullDto(checkEventIsExist(eventId));
+        Event event = checkEventIsExist(eventId);
+        event.setViews(event.getViews() + 1);
+        eventRepository.save(event);
+        return EventMapper.toFullDto(event);
     }
 
     private void checkSearchDateTime(LocalDateTime rangeStart, LocalDateTime rangeEnd) {
-        log.info("Начата процедура проверки на противоречия между датой начала и датой окончания поиска");
-        if (rangeStart != null && rangeEnd != null && rangeStart.isAfter(rangeEnd)) {
+        log.info("Начата процедура проверки на противоречия между датой начала {} и датой окончания поиска {}",
+                rangeStart, rangeEnd);
+        if (rangeStart.isAfter(rangeEnd)) {
             throw new EventDateTimeException("Начало диапазона не может быть позднее его окончания");
         }
     }

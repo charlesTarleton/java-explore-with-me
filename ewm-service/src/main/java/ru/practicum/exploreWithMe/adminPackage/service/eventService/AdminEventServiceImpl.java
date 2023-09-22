@@ -10,7 +10,9 @@ import ru.practicum.exploreWithMe.commonFiles.category.repository.CategoryReposi
 import ru.practicum.exploreWithMe.commonFiles.event.dto.EventFullDto;
 import ru.practicum.exploreWithMe.commonFiles.event.dto.UpdateEventAdminRequest;
 import ru.practicum.exploreWithMe.commonFiles.event.model.Event;
+import ru.practicum.exploreWithMe.commonFiles.event.model.Location;
 import ru.practicum.exploreWithMe.commonFiles.event.repository.EventRepository;
+import ru.practicum.exploreWithMe.commonFiles.event.repository.LocationRepository;
 import ru.practicum.exploreWithMe.commonFiles.event.utils.AdminAction;
 import ru.practicum.exploreWithMe.commonFiles.event.utils.EventMapper;
 import ru.practicum.exploreWithMe.commonFiles.event.utils.EventState;
@@ -22,8 +24,10 @@ import ru.practicum.exploreWithMe.commonFiles.utils.AppDateTimeFormatter;
 import ru.practicum.exploreWithMe.commonFiles.utils.ExploreWithMePageable;
 
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -33,6 +37,7 @@ import java.util.stream.Collectors;
 public class AdminEventServiceImpl implements AdminEventService {
     private final EventRepository eventRepository;
     private final CategoryRepository categoryRepository;
+    private final LocationRepository locationRepository;
     private static final String SERVICE_LOG = "Сервис событий администратора получил запрос на {}{}";
     private static final byte REQUIREMENT_HOURS_COUNT = 1;
 
@@ -41,23 +46,65 @@ public class AdminEventServiceImpl implements AdminEventService {
                                                     String rangeStartStr, String rangeEndStr, Integer from,
                                                     Integer size) {
         log.info(SERVICE_LOG, "получение списка событий по параметрам", "");
+        Set<Long> usersSet = null;
+        if (users != null) {
+            usersSet = Set.of(users);
+        }
+        Set<EventState> statesSet = checkStateArray(states);
+        Set<Long> categoriesSet = null;
+        if (categories != null) {
+            categoriesSet = Set.of(categories);
+        }
         LocalDateTime rangeStart = AppDateTimeFormatter.toDateTime(rangeStartStr);
         LocalDateTime rangeEnd = AppDateTimeFormatter.toDateTime(rangeEndStr);
         checkSearchDateTime(rangeStart, rangeEnd);
-        return eventRepository.getEventsWithSettings(users, states, categories, rangeStart, rangeEnd,
-                        new ExploreWithMePageable(from, size, Sort.unsorted())).stream()
-                .map(EventMapper::toFullDto)
-                .collect(Collectors.toList());
+        List<Event> eventList = eventRepository.getEventsWithSettings(usersSet, statesSet, categoriesSet,
+                new ExploreWithMePageable(from, size, Sort.unsorted()));
+        if (rangeStart != null && rangeEnd != null) {
+            return eventList.stream()
+                    .filter(event -> event.getEventDate().isAfter(rangeStart)
+                            && event.getEventDate().isBefore(rangeEnd))
+                    .map(EventMapper::toFullDto)
+                    .collect(Collectors.toList());
+        } else if (rangeStart != null) {
+            return eventList.stream()
+                    .filter(event -> event.getEventDate().isAfter(rangeStart))
+                    .map(EventMapper::toFullDto)
+                    .collect(Collectors.toList());
+        } else if (rangeEnd != null) {
+            return eventList.stream()
+                    .filter(event -> event.getEventDate().isBefore(rangeEnd))
+                    .map(EventMapper::toFullDto)
+                    .collect(Collectors.toList());
+        } else {
+            return eventList.stream()
+                    .map(EventMapper::toFullDto)
+                    .collect(Collectors.toList());
+        }
     }
 
     public EventFullDto updateEvent(Long eventId, UpdateEventAdminRequest eventDto) {
         log.info(SERVICE_LOG, "изменение события с id: ", eventId);
-        Category category = checkCategoryIsExist(eventDto.getCategory());
+        Category category;
         Event oldEvent = checkEventIsExist(eventId);
-        checkEventDateTime(eventDto.getEventDate());
-        checkEventStatus(oldEvent.getStateAction(), eventDto.getStateAction());
+        if (eventDto.getLocation() != null) {
+            eventDto.setLocation(checkLocationIsExist(eventDto.getLocation()));
+        }
+        if (eventDto.getCategory() != null) {
+            category = checkCategoryIsExist(eventDto.getCategory());
+        } else {
+            category = oldEvent.getCategory();
+        }
         Event event;
-        if (eventDto.getStateAction().equals(AdminAction.PUBLISH_EVENT)) {
+        if (eventDto.getStateAction() != null) {
+            checkEventStatus(oldEvent.getStateAction(), eventDto.getStateAction());
+        }
+        if (eventDto.getStateAction() != null && eventDto.getStateAction().equals(AdminAction.PUBLISH_EVENT)) {
+            if (eventDto.getEventDate() != null) {
+                checkEventDateTime(eventDto.getEventDate());
+            } else {
+                checkEventDateTime(oldEvent.getEventDate());
+            }
             event = EventMapper.toEvent(eventId, category, eventDto, oldEvent, EventState.PUBLISHED);
         } else {
             event = EventMapper.toEvent(eventId, category, eventDto, oldEvent, EventState.REJECTED);
@@ -85,7 +132,7 @@ public class AdminEventServiceImpl implements AdminEventService {
 
     private void checkEventDateTime(LocalDateTime eventDateTime) {
         log.info("Начата процедура проверки соответствия даты и времени начала события требованиям приложения");
-        if (eventDateTime.isAfter(LocalDateTime.now().plusHours(REQUIREMENT_HOURS_COUNT))) {
+        if (eventDateTime.isBefore(LocalDateTime.now().plusHours(REQUIREMENT_HOURS_COUNT))) {
             throw new EventDateTimeException("До начала события осталось менее " + REQUIREMENT_HOURS_COUNT + " часов");
         }
     }
@@ -106,5 +153,35 @@ public class AdminEventServiceImpl implements AdminEventService {
         if (eventState.equals(EventState.PUBLISHED) && adminAction.equals(AdminAction.REJECT_EVENT)) {
             throw new EventUpdateStateException("Нельзя отказать в публикации ранее опубликованного события");
         }
+    }
+
+    private Location checkLocationIsExist(Location location) {
+        log.info("Начата процедура проверки наличия локации и её сохранения(при отсутствии в базе данных)");
+        Optional<Location> locationOptional = locationRepository
+                .findByCoordinates(location.getLat(), location.getLon());
+        if (locationOptional.isEmpty()) {
+            location = locationRepository.save(location);
+        } else {
+            location = locationOptional.get();
+        }
+        return location;
+    }
+
+    private Set<EventState> checkStateArray(String[] states) {
+        Set<EventState> statesSet = null;
+        if (states != null) {
+            statesSet = Arrays.stream(states)
+                    .filter(state -> {
+                        try {
+                            EventState.valueOf(state);
+                            return true;
+                        } catch (IllegalArgumentException e) {
+                            return false;
+                        }
+                    })
+                    .map(EventState::valueOf)
+                    .collect(Collectors.toSet());
+        }
+        return statesSet;
     }
 }

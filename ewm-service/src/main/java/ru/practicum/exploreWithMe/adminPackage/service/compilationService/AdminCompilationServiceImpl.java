@@ -15,6 +15,7 @@ import ru.practicum.exploreWithMe.commonFiles.event.repository.EventRepository;
 import ru.practicum.exploreWithMe.commonFiles.exception.fourHundredFour.CompilationExistException;
 import ru.practicum.exploreWithMe.commonFiles.exception.fourHundredFour.EventExistException;
 
+import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
@@ -57,7 +58,10 @@ public class AdminCompilationServiceImpl implements AdminCompilationService {
 
     private Set<Event> getEventSet(Set<Long> events) {
         log.info("Начата процедура проверки и получения событий из id-коллекции");
-        Set<Event> eventSet = eventRepository.getEventsById(events);
+        if (events == null) {
+            return Set.of();
+        }
+        Set<Event> eventSet = new HashSet<>(eventRepository.getEventsById(events));
         if (eventSet.size() != events.size()) {
             throw new EventExistException("Как минимум одно из указанных событий не найдено");
         }

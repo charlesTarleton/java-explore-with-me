@@ -13,6 +13,7 @@ import ru.practicum.exploreWithMe.commonFiles.user.utils.UserMapper;
 import ru.practicum.exploreWithMe.commonFiles.utils.ExploreWithMePageable;
 
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -26,7 +27,11 @@ public class AdminUserServiceImpl implements AdminUserService {
     @Transactional(readOnly = true)
     public List<UserDto> getUsersWithSettings(Long[] users, Integer from, Integer size) {
         log.info(SERVICE_LOG, "получение списка пользователей", "");
-        return userRepository.getUsersByIds(users, new ExploreWithMePageable(from, size, Sort.unsorted())).stream()
+        Set<Long> usersSet = null;
+        if (users != null) {
+            usersSet = Set.of(users);
+        }
+        return userRepository.getUsersByIds(usersSet, new ExploreWithMePageable(from, size, Sort.unsorted())).stream()
                 .map(UserMapper::toDto)
                 .collect(Collectors.toList());
     }

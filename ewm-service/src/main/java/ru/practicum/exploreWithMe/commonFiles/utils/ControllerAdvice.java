@@ -22,7 +22,7 @@ public class ControllerAdvice {
     public static final String ERROR_409 = "Ошибка 409";
     public static final String ERROR_500 = "Ошибка 500";
 
-    @ExceptionHandler
+    @ExceptionHandler()
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ApiError fourHundredErrorHandle(final Exception exception) {
         log.warn(ERROR_400, exception);
@@ -38,11 +38,12 @@ public class ControllerAdvice {
 
     @ExceptionHandler({EventDateTimeException.class, EventLimitException.class, EventNotPublicisedException.class,
             EventUpdateStateException.class, RequestChangeNotPendingStatusException.class,
-            RequestRepeatException.class, UserIsNotEventInitiatorException.class, UserIsNotRequesterException.class})
-    @ResponseStatus(HttpStatus.FORBIDDEN)
+            RequestRepeatException.class, UserIsNotEventInitiatorException.class, UserIsNotRequesterException.class,
+            CategoryDuplicateException.class})
+    @ResponseStatus(HttpStatus.CONFLICT)
     public ApiError fourHundredNineErrorHandle(final Exception exception) {
         log.warn(ERROR_409, exception);
-        return createApiError(exception, HttpStatus.FORBIDDEN);
+        return createApiError(exception, HttpStatus.CONFLICT);
     }
 
     @ExceptionHandler({Throwable.class})

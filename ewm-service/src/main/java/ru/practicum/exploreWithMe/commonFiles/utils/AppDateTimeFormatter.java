@@ -10,7 +10,8 @@ import java.time.format.DateTimeParseException;
 @UtilityClass
 @Slf4j
 public class AppDateTimeFormatter {
-    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    public static final String pattern = "yyyy-MM-dd HH:mm:ss";
+    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern(pattern);
 
     public LocalDateTime toDateTime(String localDateTimeStr) {
         log.info("Начата процедура преобразования строки в дату: {}", localDateTimeStr);

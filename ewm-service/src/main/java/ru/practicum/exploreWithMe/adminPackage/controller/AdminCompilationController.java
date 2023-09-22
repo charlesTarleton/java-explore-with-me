@@ -3,25 +3,25 @@ package ru.practicum.exploreWithMe.adminPackage.controller;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.exploreWithMe.adminPackage.service.compilationService.AdminCompilationServiceImpl;
 import ru.practicum.exploreWithMe.commonFiles.compilation.dto.CompilationDto;
 import ru.practicum.exploreWithMe.commonFiles.compilation.dto.NewCompilationDto;
 import ru.practicum.exploreWithMe.commonFiles.compilation.dto.UpdateCompilationRequest;
 
+import javax.validation.Valid;
+
 @RestController
 @Slf4j
 @RequestMapping("/admin/compilations")
 @RequiredArgsConstructor
-@Validated
 public class AdminCompilationController {
     private final AdminCompilationServiceImpl adminService;
     private static final String CONTROLLER_LOG = "Контроллер подборок событий администратора получил запрос на {}{}";
 
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping
-    public CompilationDto addCompilation(@RequestBody NewCompilationDto compilationDto) {
+    public CompilationDto addCompilation(@Valid @RequestBody NewCompilationDto compilationDto) {
         log.info(CONTROLLER_LOG, "добавление новой подборки событий: ", compilationDto);
         return adminService.addCompilation(compilationDto);
     }
@@ -35,7 +35,7 @@ public class AdminCompilationController {
 
     @PatchMapping("/{compId}")
     public CompilationDto updateCompilation(@PathVariable("compId") Long compilationId,
-                                    @RequestBody UpdateCompilationRequest compilationDto) {
+                                            @Valid @RequestBody UpdateCompilationRequest compilationDto) {
         log.info(CONTROLLER_LOG, "изменение добавленной подборки событий с id: ", compilationId);
         return adminService.updateCompilation(compilationId, compilationDto);
     }

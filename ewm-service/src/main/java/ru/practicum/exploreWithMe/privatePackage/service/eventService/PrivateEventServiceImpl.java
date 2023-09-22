@@ -63,7 +63,7 @@ public class PrivateEventServiceImpl implements PrivateEventService {
         Category category = checkCategoryIsExist(eventDto.getCategory());
         checkEventDateTime(eventDto.getEventDate());
         eventDto.setLocation(checkLocationIsExist(eventDto.getLocation()));
-        Event event = EventMapper.toEvent(null, category, eventDto, 0, user, 0);
+        Event event = EventMapper.toEvent(null, category, eventDto, 0L, user, 0);
         return EventMapper.toFullDto(eventRepository.save(event));
     }
 
@@ -79,10 +79,15 @@ public class PrivateEventServiceImpl implements PrivateEventService {
     public EventFullDto updateEvent(Long userId, Long eventId, UpdateEventUserRequest eventDto) {
         log.info(SERVICE_LOG, "изменение добавленного пользователем события с id: ", eventId);
         User user = checkUserIsExist(userId);
-        Category category = checkCategoryIsExist(eventDto.getCategory());
         Event oldEvent = checkEventIsExist(eventId);
+        Category category = oldEvent.getCategory();
+        if (eventDto.getCategory() != null) {
+            category = checkCategoryIsExist(eventDto.getCategory());
+        }
         checkUserIsEventInitiator(userId, oldEvent.getInitiator().getId());
-        checkEventDateTime(eventDto.getEventDate());
+        if (eventDto.getEventDate() != null) {
+            checkEventDateTime(eventDto.getEventDate());
+        }
         checkEventStatus(oldEvent.getStateAction());
         if (eventDto.getLocation() != null &&
                 eventDto.getLocation().getLat() != null &&
@@ -92,9 +97,9 @@ public class PrivateEventServiceImpl implements PrivateEventService {
             eventDto.setLocation(oldEvent.getLocation());
         }
         Event event;
-        if (eventDto.getStateAction().equals(UserAction.CANCEL_REVIEW)) {
+        if (eventDto.getStateAction() != null && eventDto.getStateAction().equals(UserAction.CANCEL_REVIEW)) {
             event = EventMapper.toEvent(eventId, category, eventDto, user, EventState.CANCELED, oldEvent);
-        } else if (eventDto.getStateAction().equals(UserAction.SEND_TO_REVIEW)) {
+        } else if (eventDto.getStateAction() != null && eventDto.getStateAction().equals(UserAction.SEND_TO_REVIEW)) {
             event = EventMapper.toEvent(eventId, category, eventDto, user, EventState.PENDING, oldEvent);
         } else {
             event = EventMapper.toEvent(eventId, category, eventDto, user, oldEvent.getStateAction(), oldEvent);
@@ -120,7 +125,7 @@ public class PrivateEventServiceImpl implements PrivateEventService {
         Event event = checkEventIsExist(eventId);
         checkEventIsLimited(event);
         List<Request> requestList = requestRepository.findAllByRequestIdList(requestStatuses.getRequestIds());
-        if (event.getParticipantLimit() != 0 && !event.getRequestModeration()) {
+        if (event.getParticipantLimit() != 0 && event.getRequestModeration()) {
             for (Request request : requestList) {
                 if (!request.getStatus().equals(RequestStatus.PENDING)) {
                     throw new RequestChangeNotPendingStatusException("Ошибка. Попытка изменить статус запроса на " +
@@ -187,16 +192,18 @@ public class PrivateEventServiceImpl implements PrivateEventService {
     }
 
     private void checkEventDateTime(LocalDateTime eventDateTime) {
-        log.info("Начата процедура проверки соответствия даты и времени начала события требованиям приложения");
-        if (eventDateTime.isAfter(LocalDateTime.now().plusHours(REQUIREMENT_HOURS_COUNT))) {
+        log.info("Начата процедура проверки соответствия даты и времени начала события требованиям приложения: {}",
+                eventDateTime);
+        if (eventDateTime.isBefore(LocalDateTime.now().plusHours(REQUIREMENT_HOURS_COUNT))) {
             throw new EventDateTimeException("До начала события осталось менее " + REQUIREMENT_HOURS_COUNT + " часов");
         }
     }
 
     private void checkEventStatus(EventState eventState) {
         log.info("Начата процедура проверки соответствия статуса события требованиям приложения");
-        if (eventState != EventState.CANCELED || eventState != EventState.PENDING) {
-            throw new EventUpdateStateException("Редактирование опубликованных событий не допускается");
+        if (eventState != EventState.CANCELED && eventState != EventState.PENDING) {
+            throw new EventUpdateStateException("Допускается редактирование только отмененных или " +
+                    "ожидающих публикации событий ");
         }
     }
 
@@ -209,7 +216,8 @@ public class PrivateEventServiceImpl implements PrivateEventService {
 
     private Location checkLocationIsExist(Location location) {
         log.info("Начата процедура проверки наличия локации и её сохранения(при отсутствии в базе данных)");
-        Optional<Location> locationOptional = locationRepository.findById(location.getLat(), location.getLon());
+        Optional<Location> locationOptional = locationRepository
+                .findByCoordinates(location.getLat(), location.getLon());
         if (locationOptional.isEmpty()) {
             location = locationRepository.save(location);
         } else {

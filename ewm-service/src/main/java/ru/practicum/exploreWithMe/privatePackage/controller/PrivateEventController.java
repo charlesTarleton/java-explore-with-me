@@ -3,7 +3,6 @@ package ru.practicum.exploreWithMe.privatePackage.controller;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.exploreWithMe.commonFiles.event.dto.EventFullDto;
 import ru.practicum.exploreWithMe.commonFiles.event.dto.EventShortDto;
@@ -14,13 +13,13 @@ import ru.practicum.exploreWithMe.commonFiles.request.dto.EventRequestStatusUpda
 import ru.practicum.exploreWithMe.commonFiles.request.dto.ParticipationRequestDto;
 import ru.practicum.exploreWithMe.privatePackage.service.eventService.PrivateEventService;
 
+import javax.validation.Valid;
 import java.util.List;
 
 @RestController
 @Slf4j
 @RequestMapping("/users/{userId}/events")
 @RequiredArgsConstructor
-@Validated
 public class PrivateEventController {
     private final PrivateEventService privateService;
     private static final String CONTROLLER_LOG = "Частный контроллер событий получил запрос на {}{}";
@@ -36,7 +35,7 @@ public class PrivateEventController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public EventFullDto addEvent(@PathVariable("userId") Long userId,
-                                 @RequestBody NewEventDto eventDto) {
+                                 @Valid @RequestBody NewEventDto eventDto) {
         log.info(CONTROLLER_LOG, "добавление нового события: ", eventDto);
         return privateService.addEvent(userId, eventDto);
     }
@@ -51,7 +50,7 @@ public class PrivateEventController {
     @PatchMapping("/{eventId}")
     public EventFullDto updateEvent(@PathVariable("userId") Long userId,
                                     @PathVariable("eventId") Long eventId,
-                                    @RequestBody UpdateEventUserRequest eventDto) {
+                                    @Valid @RequestBody UpdateEventUserRequest eventDto) {
         log.info(CONTROLLER_LOG, "изменение добавленного пользователем события с id: ", eventId);
         return privateService.updateEvent(userId, eventId, eventDto);
     }
@@ -66,7 +65,7 @@ public class PrivateEventController {
     @PatchMapping("/{eventId}/requests")
     public EventRequestStatusUpdateResult approvingEventRequest(@PathVariable("userId") Long userId,
                                                                 @PathVariable("eventId") Long eventId,
-                                                                @RequestBody EventRequestStatusUpdateRequest
+                                                                @Valid @RequestBody EventRequestStatusUpdateRequest
                                                                             requestStatuses) {
         log.info(CONTROLLER_LOG, "изменение статуса заявок на участие в событии с id: ", eventId);
         return privateService.approvingEventRequest(userId, eventId, requestStatuses);

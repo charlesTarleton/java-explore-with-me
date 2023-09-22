@@ -4,25 +4,29 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.hibernate.validator.constraints.Length;
+import lombok.Setter;
 import ru.practicum.exploreWithMe.commonFiles.event.model.Location;
 import ru.practicum.exploreWithMe.commonFiles.event.utils.AdminAction;
 
+import javax.validation.constraints.Size;
 import java.time.LocalDateTime;
 
+import static ru.practicum.exploreWithMe.commonFiles.utils.AppDateTimeFormatter.pattern;
+
+@Setter
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
 public class UpdateEventAdminRequest {
-    @Length(min = 20, max = 2000)
+    @Size(min = 20, max = 2000)
     private String annotation;
 
     private Long category;
 
-    @Length(min = 20, max = 7000)
+    @Size(min = 20, max = 7000)
     private String description;
 
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @JsonFormat(pattern = pattern)
     private LocalDateTime eventDate;
 
     private Location location;
@@ -35,6 +39,6 @@ public class UpdateEventAdminRequest {
 
     private AdminAction stateAction;
 
-    @Length(min = 3, max = 120)
+    @Size(min = 3, max = 120)
     private String title;
 }

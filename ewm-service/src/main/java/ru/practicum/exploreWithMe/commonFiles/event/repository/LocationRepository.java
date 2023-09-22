@@ -11,6 +11,6 @@ public interface LocationRepository extends JpaRepository<Location, Long> {
     @Query("SELECT l " +
             "FROM Location AS l " +
             "WHERE l.lat = :lat AND l.lon = :lon")
-    Optional<Location> findById(@Param("lat") Float lat,
-                                @Param("lon") Float lon);
+    Optional<Location> findByCoordinates(@Param("lat") Float lat,
+                                         @Param("lon") Float lon);
 }

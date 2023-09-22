@@ -4,8 +4,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.hibernate.validator.constraints.Length;
 
+import javax.validation.constraints.Size;
 import java.util.Set;
 
 @Setter
@@ -17,6 +17,6 @@ public class UpdateCompilationRequest {
 
     private Boolean pinned;
 
-    @Length(min = 1, max = 50)
+    @Size(min = 1, max = 50)
     private String title;
 }

@@ -8,11 +8,13 @@ import ru.practicum.exploreWithMe.commonFiles.request.utils.RequestStatus;
 
 import java.time.LocalDateTime;
 
+import static ru.practicum.exploreWithMe.commonFiles.utils.AppDateTimeFormatter.pattern;
+
 @Getter
 @RequiredArgsConstructor
 @AllArgsConstructor
 public class ParticipationRequestDto {
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = pattern)
     private LocalDateTime created;
 
     private Long event;

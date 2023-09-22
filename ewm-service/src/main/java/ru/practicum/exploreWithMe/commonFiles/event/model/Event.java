@@ -12,6 +12,8 @@ import ru.practicum.exploreWithMe.commonFiles.user.model.User;
 import javax.persistence.*;
 import java.time.LocalDateTime;
 
+import static ru.practicum.exploreWithMe.commonFiles.utils.AppDateTimeFormatter.pattern;
+
 @Getter
 @Setter
 @AllArgsConstructor
@@ -32,17 +34,17 @@ public class Event {
     private Category category;
 
     @Column(name = "event_confirmed_requests")
-    private Integer confirmedRequests;
+    private Long confirmedRequests;
 
     @Column(name = "event_created_on")
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @JsonFormat(pattern = pattern)
     private LocalDateTime createdOn;
 
     @Column(name = "event_description")
     private String description;
 
     @Column(name = "event_date")
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @JsonFormat(pattern = pattern)
     private LocalDateTime eventDate;
 
     @ManyToOne
@@ -60,7 +62,7 @@ public class Event {
     private Long participantLimit;
 
     @Column(name = "event_published_on")
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @JsonFormat(pattern = pattern)
     private LocalDateTime publishedOn;
 
     @Column(name = "event_request_moderation")
