@@ -6,7 +6,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.google.gson.Gson;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -37,7 +36,6 @@ public class StatsClient {
                                            String[] uris, Boolean unique) {
         log.info(CLIENT_LOG, "получение элементов статистики с параметрами:",
                 "\nstart " + start + "\nend " + end + "\nuris " + Arrays.toString(uris) + "\nunique" + unique);
-        Gson gson = new Gson();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         String startStr = start.format(formatter);
         String endStr = end.format(formatter);
