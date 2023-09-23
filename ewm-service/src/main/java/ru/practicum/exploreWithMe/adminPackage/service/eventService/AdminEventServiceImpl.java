@@ -16,6 +16,7 @@ import ru.practicum.exploreWithMe.commonFiles.event.repository.LocationRepositor
 import ru.practicum.exploreWithMe.commonFiles.event.utils.AdminAction;
 import ru.practicum.exploreWithMe.commonFiles.event.utils.EventMapper;
 import ru.practicum.exploreWithMe.commonFiles.event.utils.EventState;
+import ru.practicum.exploreWithMe.commonFiles.exception.fourHundred.EventDateTimePastException;
 import ru.practicum.exploreWithMe.commonFiles.exception.fourHundredNine.EventDateTimeException;
 import ru.practicum.exploreWithMe.commonFiles.exception.fourHundredNine.EventUpdateStateException;
 import ru.practicum.exploreWithMe.commonFiles.exception.fourHundredFour.CategoryExistException;
@@ -99,11 +100,14 @@ public class AdminEventServiceImpl implements AdminEventService {
         if (eventDto.getStateAction() != null) {
             checkEventStatus(oldEvent.getStateAction(), eventDto.getStateAction());
         }
+        if (eventDto.getEventDate() != null) {
+            checkEventDateTime(eventDto.getEventDate());
+        }
         if (eventDto.getStateAction() != null && eventDto.getStateAction().equals(AdminAction.PUBLISH_EVENT)) {
             if (eventDto.getEventDate() != null) {
-                checkEventDateTime(eventDto.getEventDate());
+                checkEventDateTimeForPublish(eventDto.getEventDate());
             } else {
-                checkEventDateTime(oldEvent.getEventDate());
+                checkEventDateTimeForPublish(oldEvent.getEventDate());
             }
             event = EventMapper.toEvent(eventId, category, eventDto, oldEvent, EventState.PUBLISHED);
         } else {
@@ -130,10 +134,17 @@ public class AdminEventServiceImpl implements AdminEventService {
         return event.get();
     }
 
-    private void checkEventDateTime(LocalDateTime eventDateTime) {
-        log.info("Начата процедура проверки соответствия даты и времени начала события требованиям приложения");
+    private void checkEventDateTimeForPublish(LocalDateTime eventDateTime) {
+        log.info("Начата процедура проверки даты и времени начала события до наступления события");
         if (eventDateTime.isBefore(LocalDateTime.now().plusHours(REQUIREMENT_HOURS_COUNT))) {
             throw new EventDateTimeException("До начала события осталось менее " + REQUIREMENT_HOURS_COUNT + " часов");
+        }
+    }
+
+    private void checkEventDateTime(LocalDateTime eventDateTime) {
+        log.info("Начата процедура проверки даты и времени начала события на указание будущего события");
+        if (eventDateTime.isBefore(LocalDateTime.now())) {
+            throw new EventDateTimePastException("Дата события не может быть в прошлом");
         }
     }
 

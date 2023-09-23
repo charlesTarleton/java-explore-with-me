@@ -1,5 +1,6 @@
 package ru.practicum.exploreWithMe.commonFiles.event.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -7,6 +8,8 @@ import ru.practicum.exploreWithMe.commonFiles.category.dto.CategoryDto;
 import ru.practicum.exploreWithMe.commonFiles.user.dto.UserShortDto;
 
 import java.time.LocalDateTime;
+
+import static ru.practicum.exploreWithMe.commonFiles.utils.AppDateTimeFormatter.pattern;
 
 @Getter
 @AllArgsConstructor
@@ -18,6 +21,7 @@ public class EventShortDto {
 
     private Long confirmedRequests;
 
+    @JsonFormat(pattern = pattern)
     private LocalDateTime eventDate;
 
     private Long id;

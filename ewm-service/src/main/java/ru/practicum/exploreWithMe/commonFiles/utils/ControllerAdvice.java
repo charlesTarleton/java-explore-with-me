@@ -1,10 +1,15 @@
 package ru.practicum.exploreWithMe.commonFiles.utils;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import ru.practicum.exploreWithMe.commonFiles.exception.fourHundred.EventDateTimePastException;
+import ru.practicum.exploreWithMe.commonFiles.exception.fourHundred.EventDateTimeRangeException;
 import ru.practicum.exploreWithMe.commonFiles.exception.fourHundredFour.ExistException;
 import ru.practicum.exploreWithMe.commonFiles.exception.fourHundredNine.*;
 
@@ -22,7 +27,9 @@ public class ControllerAdvice {
     public static final String ERROR_409 = "Ошибка 409";
     public static final String ERROR_500 = "Ошибка 500";
 
-    @ExceptionHandler()
+    @ExceptionHandler({EventDateTimeRangeException.class, EventDateTimePastException.class,
+            EventDateTimeException.class, MissingServletRequestParameterException.class,
+            MethodArgumentNotValidException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ApiError fourHundredErrorHandle(final Exception exception) {
         log.warn(ERROR_400, exception);
@@ -36,10 +43,10 @@ public class ControllerAdvice {
         return createApiError(exception, HttpStatus.NOT_FOUND);
     }
 
-    @ExceptionHandler({EventDateTimeException.class, EventLimitException.class, EventNotPublicisedException.class,
+    @ExceptionHandler({EventLimitException.class, EventNotPublicisedException.class,
             EventUpdateStateException.class, RequestChangeNotPendingStatusException.class,
             RequestRepeatException.class, UserIsNotEventInitiatorException.class, UserIsNotRequesterException.class,
-            CategoryDuplicateException.class})
+            DataIntegrityViolationException.class})
     @ResponseStatus(HttpStatus.CONFLICT)
     public ApiError fourHundredNineErrorHandle(final Exception exception) {
         log.warn(ERROR_409, exception);

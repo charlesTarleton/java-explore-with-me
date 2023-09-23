@@ -9,6 +9,7 @@ import ru.practicum.exploreWithMe.commonFiles.category.dto.CategoryDto;
 import ru.practicum.exploreWithMe.commonFiles.category.dto.NewCategoryDto;
 
 import javax.validation.Valid;
+import java.sql.SQLException;
 
 @RestController
 @Slf4j
@@ -20,7 +21,7 @@ public class AdminCategoryController {
 
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping
-    public CategoryDto addCategory(@Valid @RequestBody NewCategoryDto categoryDto) {
+    public CategoryDto addCategory(@Valid @RequestBody NewCategoryDto categoryDto) throws SQLException {
         log.info(CONTROLLER_LOG, "добавление новой категории: ", categoryDto);
         return adminService.addCategory(categoryDto);
     }

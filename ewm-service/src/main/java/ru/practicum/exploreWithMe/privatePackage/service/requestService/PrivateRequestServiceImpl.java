@@ -54,13 +54,13 @@ public class PrivateRequestServiceImpl implements PrivateRequestService {
         checkIsUserRepeatRequest(userId, eventId);
         checkEventIsPublished(event);
         Request request;
-        if (!event.getRequestModeration() || event.getParticipantLimit() == 0) {
+        if (event.getRequestModeration() || event.getParticipantLimit() != 0) {
+            checkEventIsLimited(event);
+            request = RequestMapper.toRequest(user, event, RequestStatus.PENDING);
+        } else {
             request = RequestMapper.toRequest(user, event, RequestStatus.CONFIRMED);
             event.setConfirmedRequests(event.getConfirmedRequests() + 1);
             eventRepository.save(event);
-        } else {
-            checkEventIsLimited(event);
-            request = RequestMapper.toRequest(user, event, RequestStatus.PENDING);
         }
         return RequestMapper.toDto(requestRepository.save(request));
     }
@@ -136,7 +136,7 @@ public class PrivateRequestServiceImpl implements PrivateRequestService {
 
     private void checkIsUserRepeatRequest(Long userId, Long eventId) {
         log.info("Начата процедура проверки на повторный запрос от пользователя");
-        Optional<Request> request = requestRepository.getUserEventRequest(userId, eventId);
+        Optional<Request> request = requestRepository.getUserEventRequest(eventId, userId);
         if (request.isPresent()) {
             throw new RequestRepeatException("Пользователь направил повторный запрос");
         }

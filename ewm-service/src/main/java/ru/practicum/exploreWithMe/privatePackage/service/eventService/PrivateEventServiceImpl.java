@@ -15,6 +15,7 @@ import ru.practicum.exploreWithMe.commonFiles.event.repository.LocationRepositor
 import ru.practicum.exploreWithMe.commonFiles.event.utils.EventMapper;
 import ru.practicum.exploreWithMe.commonFiles.event.utils.EventState;
 import ru.practicum.exploreWithMe.commonFiles.event.utils.UserAction;
+import ru.practicum.exploreWithMe.commonFiles.exception.fourHundred.EventDateTimePastException;
 import ru.practicum.exploreWithMe.commonFiles.exception.fourHundredNine.EventDateTimeException;
 import ru.practicum.exploreWithMe.commonFiles.exception.fourHundredNine.EventLimitException;
 import ru.practicum.exploreWithMe.commonFiles.exception.fourHundredNine.EventUpdateStateException;
@@ -197,13 +198,17 @@ public class PrivateEventServiceImpl implements PrivateEventService {
         if (eventDateTime.isBefore(LocalDateTime.now().plusHours(REQUIREMENT_HOURS_COUNT))) {
             throw new EventDateTimeException("До начала события осталось менее " + REQUIREMENT_HOURS_COUNT + " часов");
         }
+        if (eventDateTime.isBefore(LocalDateTime.now())) {
+            throw new EventDateTimePastException("Дата события не может быть в прошлом");
+        }
     }
 
     private void checkEventStatus(EventState eventState) {
-        log.info("Начата процедура проверки соответствия статуса события требованиям приложения");
-        if (eventState != EventState.CANCELED && eventState != EventState.PENDING) {
+        log.info("Начата процедура проверки соответствия статуса события {} требованиям приложения",
+                eventState.toString());
+        if (eventState.equals(EventState.PUBLISHED)) {
             throw new EventUpdateStateException("Допускается редактирование только отмененных или " +
-                    "ожидающих публикации событий ");
+                    "ожидающих публикации событий");
         }
     }
 

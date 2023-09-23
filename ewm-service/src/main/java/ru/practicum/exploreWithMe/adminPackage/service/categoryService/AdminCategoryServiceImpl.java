@@ -10,7 +10,6 @@ import ru.practicum.exploreWithMe.commonFiles.category.model.Category;
 import ru.practicum.exploreWithMe.commonFiles.category.repository.CategoryRepository;
 import ru.practicum.exploreWithMe.commonFiles.category.utils.CategoryMapper;
 import ru.practicum.exploreWithMe.commonFiles.exception.fourHundredFour.CategoryExistException;
-import ru.practicum.exploreWithMe.commonFiles.exception.fourHundredNine.CategoryDuplicateException;
 
 import java.util.Optional;
 
@@ -35,8 +34,10 @@ public class AdminCategoryServiceImpl implements AdminCategoryService {
 
     public CategoryDto updateCategory(Long categoryId, NewCategoryDto categoryDto) {
         log.info(SERVICE_LOG, "изменение категории с id: ", categoryId);
-        Category oldCategory = checkCategoryIsExist(categoryId);
-        checkCategoryIsDuplicate(categoryDto.getName(), oldCategory.getName());
+        Category category = checkCategoryIsExist(categoryId);
+        if (category.getName().equals(categoryDto.getName())) {
+            return CategoryMapper.toDto(category);
+        }
         return CategoryMapper.toDto(categoryRepository.save(CategoryMapper.toCategory(categoryDto)));
     }
 
@@ -47,12 +48,5 @@ public class AdminCategoryServiceImpl implements AdminCategoryService {
             throw new CategoryExistException("Ошибка. Указанная категория не найдена");
         }
         return category.get();
-    }
-
-    private void checkCategoryIsDuplicate(String name, String oldName) {
-        log.info("Начата процедура проверки изменения названия категории с {} на {}", name, oldName);
-        if (name.equals(oldName)) {
-            throw new CategoryDuplicateException("Новое название категории полностью копирует старое название");
-        }
     }
 }

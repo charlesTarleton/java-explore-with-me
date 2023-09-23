@@ -34,11 +34,19 @@ public class CompilationMapper {
                 compilation.getTitle());
     }
 
-    public Compilation toCompilation(Long compilationId,
-                                     UpdateCompilationRequest compilationDto, Set<Event> eventSet) {
+    public Compilation toCompilation(Long compilationId, UpdateCompilationRequest compilationDto,
+                                     Set<Event> eventSet, Compilation oldCompilation) {
         log.info("Начата процедура преобразования измененного ДТО в подборку: {}", compilationDto);
         if (compilationDto.getPinned() == null) {
-            compilationDto.setPinned(false);
+            compilationDto.setPinned(oldCompilation.getPinned());
+        }
+        if (compilationDto.getEvents() == null) {
+            compilationDto.setEvents(oldCompilation.getEvents().stream()
+                    .map(Event::getId)
+                    .collect(Collectors.toSet()));
+        }
+        if (compilationDto.getTitle() == null) {
+            compilationDto.setTitle(oldCompilation.getTitle());
         }
         return new Compilation(compilationId, compilationDto.getPinned(), compilationDto.getTitle(), eventSet);
     }

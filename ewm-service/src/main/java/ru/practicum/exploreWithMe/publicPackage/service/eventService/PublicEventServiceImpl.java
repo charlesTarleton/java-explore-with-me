@@ -14,7 +14,7 @@ import ru.practicum.exploreWithMe.commonFiles.event.repository.EventRepository;
 import ru.practicum.exploreWithMe.commonFiles.event.utils.EventMapper;
 import ru.practicum.exploreWithMe.commonFiles.event.utils.EventSort;
 import ru.practicum.exploreWithMe.commonFiles.event.utils.EventState;
-import ru.practicum.exploreWithMe.commonFiles.exception.fourHundredNine.EventDateTimeException;
+import ru.practicum.exploreWithMe.commonFiles.exception.fourHundred.EventDateTimeRangeException;
 import ru.practicum.exploreWithMe.commonFiles.exception.fourHundredFour.EventExistException;
 import ru.practicum.exploreWithMe.commonFiles.utils.AppDateTimeFormatter;
 import ru.practicum.exploreWithMe.commonFiles.utils.ExploreWithMePageable;
@@ -22,9 +22,7 @@ import ru.practicum.exploreWithMe.dto.EndpointHitDto;
 
 import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -35,6 +33,8 @@ public class PublicEventServiceImpl implements PublicEventService {
     private final EventRepository eventRepository;
     private final StatsClient client;
     private static final String SERVICE_LOG = "Публичный сервис событий получил запрос на {}{}";
+    private static final LocalDateTime INTERNET_BIRTHDAY = LocalDateTime
+            .of(1969, 10, 29, 21, 0, 0);
 
     @Transactional(readOnly = true)
     public List<EventShortDto> getEventsWithFiltration(String text, Long[] categories, Boolean paid,
@@ -77,8 +77,9 @@ public class PublicEventServiceImpl implements PublicEventService {
     public EventFullDto getEvent(Long eventId, HttpServletRequest request) {
         client.saveStatistic(new EndpointHitDto(request.getRequestURI(),
                 request.getRemoteAddr(), LocalDateTime.now()));
+        int views = checkViewsCount(request);
         Event event = checkEventIsExist(eventId);
-        event.setViews(event.getViews() + 1);
+        event.setViews(views);
         eventRepository.save(event);
         return EventMapper.toFullDto(event);
     }
@@ -87,7 +88,7 @@ public class PublicEventServiceImpl implements PublicEventService {
         log.info("Начата процедура проверки на противоречия между датой начала {} и датой окончания поиска {}",
                 rangeStart, rangeEnd);
         if (rangeStart.isAfter(rangeEnd)) {
-            throw new EventDateTimeException("Начало диапазона не может быть позднее его окончания");
+            throw new EventDateTimeRangeException("Начало диапазона не может быть позднее его окончания");
         }
     }
 
@@ -98,5 +99,12 @@ public class PublicEventServiceImpl implements PublicEventService {
             throw new EventExistException("Указанное событие не найдено");
         }
         return event.get();
+    }
+
+    private int checkViewsCount(HttpServletRequest request) {
+        log.info("Начата процедура проверки количества уникальных просмотров события");
+        Object object = client.getStatistic(INTERNET_BIRTHDAY, LocalDateTime.now(),
+                new String[]{request.getRequestURI()}, true).getBody();
+        return ((int) ((ArrayList<LinkedHashMap<String, Object>>) Objects.requireNonNull(object)).get(0).get("hits"));
     }
 }

@@ -34,7 +34,7 @@ public class StatsServerIntegrationTest {
         List<ViewStatsDto> viewStatsDtoList = statisticService.getStatistic(
                 AppDateTimeFormatter.toString(LocalDateTime.now().minusDays(4)),
                 AppDateTimeFormatter.toString(LocalDateTime.now().plusDays(4)),
-                new String[]{"uri1", "uri2"}, false);
+                new String[]{"[uri1]", "[uri2]"}, false);
         assertEquals(2, viewStatsDtoList.size());
         assertEquals(2, viewStatsDtoList.get(0).getHits());
         assertEquals(1, viewStatsDtoList.get(1).getHits());

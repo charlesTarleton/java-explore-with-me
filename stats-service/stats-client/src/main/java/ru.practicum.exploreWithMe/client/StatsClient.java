@@ -3,8 +3,10 @@ package ru.practicum.exploreWithMe.client;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Map;
 
+import com.google.gson.Gson;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -32,20 +34,28 @@ public class StatsClient {
     }
 
     public ResponseEntity<Object> getStatistic(LocalDateTime start, LocalDateTime end,
-                                                  String[] uris, Boolean unique) {
+                                           String[] uris, Boolean unique) {
         log.info(CLIENT_LOG, "получение элементов статистики с параметрами:",
                 "\nstart " + start + "\nend " + end + "\nuris " + Arrays.toString(uris) + "\nunique" + unique);
+        Gson gson = new Gson();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         String startStr = start.format(formatter);
         String endStr = end.format(formatter);
-        return makeAndSendRequest(HttpMethod.GET, url + "/stats",
-                Map.of("start", startStr, "end", endStr, "uris", uris, "unique", unique),
-                null);
+        Map<String, Object> parameters = new HashMap<>();
+        parameters.put("start", startStr);
+        parameters.put("end", endStr);
+        parameters.put("uris", uris);
+        parameters.put("unique", unique);
+        String path = url + "/stats/?start=" + startStr +
+                "&end=" + endStr +
+                "&uris=" + Arrays.toString(uris) +
+                "&unique=" + unique;
+        return makeAndSendRequest(HttpMethod.GET, path, parameters, null);
     }
 
     private <T> ResponseEntity<Object> makeAndSendRequest(HttpMethod method,
                                                           String path,
-                                                          @Nullable Map<String, Object> parameters,
+                                                          Map<String, Object> parameters,
                                                           @Nullable T body) {
         HttpEntity<T> requestEntity = new HttpEntity<>(body, null);
 
@@ -62,17 +72,14 @@ public class StatsClient {
         return prepareStatisticResponse(ewmServerResponse);
     }
 
-    private static ResponseEntity<Object> prepareStatisticResponse(ResponseEntity<Object> response) {
+    private ResponseEntity<Object> prepareStatisticResponse(ResponseEntity<Object> response) {
         if (response.getStatusCode().is2xxSuccessful()) {
             return response;
         }
-
         ResponseEntity.BodyBuilder responseBuilder = ResponseEntity.status(response.getStatusCode());
-
         if (response.hasBody()) {
             return responseBuilder.body(response.getBody());
         }
-
         return responseBuilder.build();
     }
 }

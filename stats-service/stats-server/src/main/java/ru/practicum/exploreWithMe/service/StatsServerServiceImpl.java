@@ -31,10 +31,10 @@ public class StatsServerServiceImpl implements StatsServerService {
     }
 
     @Transactional(readOnly = true)
-    public List<ViewStatsDto> getStatistic(String startStr, String endStr, String[] uris, boolean unique) {
-        log.info(SERVICE_LOG, "получение элементов статистики с параметрами:",
-                "\nstart " + startStr + "\nend " + endStr + "\nuris " + Arrays.toString(uris) + "\nunique" + unique);
-
+    public List<ViewStatsDto> getStatistic(String startStr, String endStr, String[] incorrectUris, boolean unique) {
+        log.info(SERVICE_LOG, "получение элементов статистики с параметрами:", "\nstart " + startStr +
+                "\nend " + endStr + "\nuris " + Arrays.toString(incorrectUris) + "\nunique" + unique);
+        String[] uris = updateArray(incorrectUris);
         LocalDateTime start = AppDateTimeFormatter.toDateTime(startStr);
         LocalDateTime end = AppDateTimeFormatter.toDateTime(endStr);
         if (start.isAfter(end)) {
@@ -54,5 +54,16 @@ public class StatsServerServiceImpl implements StatsServerService {
             viewStatsList = statisticRepository.getStatisticIfNotUniqueAndWithArray(start, end, uris);
         }
         return viewStatsList.stream().map(ViewStatsMapper::toDto).collect(Collectors.toList());
+    }
+
+    private String[] updateArray(String[] uris) {
+        if (uris == null) {
+            return null;
+        }
+        String[] correctUris = new String[uris.length];
+        for (int i = 0; i < uris.length; i++) {
+            correctUris[i] = uris[i].substring(1, uris[i].length() - 1);
+        }
+        return correctUris;
     }
 }

@@ -30,8 +30,7 @@ public class AdminCompilationServiceImpl implements AdminCompilationService {
 
     public CompilationDto addCompilation(NewCompilationDto compilationDto) {
         log.info(SERVER_LOG, "добавление новой подборки событий: ", compilationDto);
-        return CompilationMapper
-                .toDto(compilationRepository.save(CompilationMapper
+        return CompilationMapper.toDto(compilationRepository.save(CompilationMapper
                         .toCompilation(compilationDto, getEventSet(compilationDto.getEvents()))));
     }
 
@@ -43,17 +42,20 @@ public class AdminCompilationServiceImpl implements AdminCompilationService {
 
     public CompilationDto updateCompilation(Long compilationId, UpdateCompilationRequest compilationDto) {
         log.info(SERVER_LOG, "изменение добавленной подборки событий с id: ", compilationId);
-        return CompilationMapper
-                .toDto(CompilationMapper
-                        .toCompilation(compilationId, compilationDto, getEventSet(compilationDto.getEvents())));
+        Compilation oldCompilation = checkCompilationIsExist(compilationId);
+        return CompilationMapper.toDto(CompilationMapper
+                        .toCompilation(compilationId, compilationDto,
+                                getEventSet(compilationDto.getEvents()),
+                                oldCompilation));
     }
 
-    private void checkCompilationIsExist(Long compilationId) {
+    private Compilation checkCompilationIsExist(Long compilationId) {
         log.info("Начата процедура проверки наличия подборки событий с id: {}", compilationId);
         Optional<Compilation> compilation = compilationRepository.findById(compilationId);
         if (compilation.isEmpty()) {
             throw new CompilationExistException("Указанная подборка событий не найдена");
         }
+        return compilation.get();
     }
 
     private Set<Event> getEventSet(Set<Long> events) {
