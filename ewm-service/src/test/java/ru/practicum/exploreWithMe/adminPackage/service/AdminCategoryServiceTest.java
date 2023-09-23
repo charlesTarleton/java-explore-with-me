@@ -11,8 +11,6 @@ import ru.practicum.exploreWithMe.commonFiles.category.dto.NewCategoryDto;
 import ru.practicum.exploreWithMe.commonFiles.category.model.Category;
 import ru.practicum.exploreWithMe.commonFiles.category.repository.CategoryRepository;
 
-import java.util.List;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
