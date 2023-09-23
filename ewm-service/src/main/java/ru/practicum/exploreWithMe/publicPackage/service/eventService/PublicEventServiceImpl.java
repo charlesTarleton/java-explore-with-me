@@ -105,6 +105,6 @@ public class PublicEventServiceImpl implements PublicEventService {
         log.info("Начата процедура проверки количества уникальных просмотров события");
         Object object = client.getStatistic(INTERNET_BIRTHDAY, LocalDateTime.now(),
                 new String[]{request.getRequestURI()}, true).getBody();
-        return ((int) ((ArrayList<LinkedHashMap<String, Object>>) Objects.requireNonNull(object)).get(0).get("hits"));
+        return ((int) ((ArrayList<LinkedHashMap<String, Object>>) object).get(0).get("hits"));
     }
 }
