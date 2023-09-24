@@ -9,6 +9,8 @@ import ru.practicum.exploreWithMe.commonFiles.user.dto.NewUserRequest;
 import ru.practicum.exploreWithMe.commonFiles.user.dto.UserDto;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
 import java.util.List;
 
 @RestController
@@ -21,8 +23,10 @@ public class AdminUserController {
 
     @GetMapping
     public List<UserDto> getUsersWithSettings(@RequestParam(value = "ids", required = false) Long[] users,
-                                              @RequestParam(value = "from", defaultValue = "0") Integer from,
-                                              @RequestParam(value = "size", defaultValue = "10") Integer size) {
+                                              @PositiveOrZero @RequestParam(value = "from", defaultValue = "0")
+                                                  Integer from,
+                                              @Positive @RequestParam(value = "size", defaultValue = "10")
+                                                  Integer size) {
         log.info(CONTROLLER_LOG, "получение списка пользователей", "");
         return adminService.getUsersWithSettings(users, from, size);
     }

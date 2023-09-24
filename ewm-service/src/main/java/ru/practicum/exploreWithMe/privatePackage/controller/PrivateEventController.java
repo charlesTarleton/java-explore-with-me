@@ -14,6 +14,8 @@ import ru.practicum.exploreWithMe.commonFiles.request.dto.ParticipationRequestDt
 import ru.practicum.exploreWithMe.privatePackage.service.eventService.PrivateEventService;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
 import java.util.List;
 
 @RestController
@@ -26,8 +28,10 @@ public class PrivateEventController {
 
     @GetMapping
     public List<EventShortDto> getUserEvents(@PathVariable("userId") Long userId,
-                                             @RequestParam(value = "from", defaultValue = "0") Integer from,
-                                             @RequestParam(value = "size", defaultValue = "10") Integer size) {
+                                             @PositiveOrZero @RequestParam(value = "from", defaultValue = "0")
+                                                 Integer from,
+                                             @Positive @RequestParam(value = "size", defaultValue = "10")
+                                                 Integer size) {
         log.info(CONTROLLER_LOG, "получение событий, добавленных пользователем с id: ", userId);
         return privateService.getUserEvents(userId, from, size);
     }

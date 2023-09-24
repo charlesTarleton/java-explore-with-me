@@ -54,13 +54,15 @@ public class PrivateRequestServiceImpl implements PrivateRequestService {
         checkIsUserRepeatRequest(userId, eventId);
         checkEventIsPublished(event);
         Request request;
-        if (event.getRequestModeration() || event.getParticipantLimit() != 0) {
-            checkEventIsLimited(event);
-            request = RequestMapper.toRequest(user, event, RequestStatus.PENDING);
+        if (event.getParticipantLimit() == 0) {
+            request = handleIfNotRequireModeration(user, event);
         } else {
-            request = RequestMapper.toRequest(user, event, RequestStatus.CONFIRMED);
-            event.setConfirmedRequests(event.getConfirmedRequests() + 1);
-            eventRepository.save(event);
+            checkEventIsLimited(event);
+            if (event.getRequestModeration()) {
+                request = RequestMapper.toRequest(user, event, RequestStatus.PENDING);
+            } else {
+                request = handleIfNotRequireModeration(user, event);
+            }
         }
         return RequestMapper.toDto(requestRepository.save(request));
     }
@@ -78,6 +80,12 @@ public class PrivateRequestServiceImpl implements PrivateRequestService {
         }
         request.setStatus(RequestStatus.CANCELED);
         return RequestMapper.toDto(requestRepository.save(request));
+    }
+
+    private Request handleIfNotRequireModeration(User user, Event event) {
+        event.setConfirmedRequests(event.getConfirmedRequests() + 1);
+        eventRepository.save(event);
+        return RequestMapper.toRequest(user, event, RequestStatus.CONFIRMED);
     }
 
     private User checkUserIsExist(Long userId) {
@@ -114,8 +122,7 @@ public class PrivateRequestServiceImpl implements PrivateRequestService {
     }
 
     private void checkEventIsLimited(Event event) {
-        if (event.getParticipantLimit() == event.getConfirmedRequests().longValue() &&
-                event.getRequestModeration()) {
+        if (event.getParticipantLimit().equals(event.getConfirmedRequests())) {
             throw new EventLimitException("Превышен лимит для направления запросов");
         }
     }

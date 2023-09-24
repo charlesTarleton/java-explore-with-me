@@ -8,6 +8,8 @@ import ru.practicum.exploreWithMe.commonFiles.event.dto.EventFullDto;
 import ru.practicum.exploreWithMe.commonFiles.event.dto.UpdateEventAdminRequest;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
 import java.util.List;
 
 @RestController
@@ -27,8 +29,10 @@ public class AdminEventController {
                                                         String rangeStart,
                                                     @RequestParam(value = "rangeEnd", required = false)
                                                         String rangeEnd,
-                                                    @RequestParam(value = "from", defaultValue = "0") Integer from,
-                                                    @RequestParam(value = "size", defaultValue = "10") Integer size) {
+                                                    @PositiveOrZero @RequestParam(value = "from", defaultValue = "0")
+                                                        Integer from,
+                                                    @Positive @RequestParam(value = "size", defaultValue = "10")
+                                                        Integer size) {
         log.info(CONTROLLER_LOG, "получение списка событий по параметрам", "");
         return adminService.getEventsWithSettings(users, states, categories, rangeStart, rangeEnd, from, size);
     }

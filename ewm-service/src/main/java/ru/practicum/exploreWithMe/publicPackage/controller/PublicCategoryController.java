@@ -6,6 +6,8 @@ import org.springframework.web.bind.annotation.*;
 import ru.practicum.exploreWithMe.commonFiles.category.dto.CategoryDto;
 import ru.practicum.exploreWithMe.publicPackage.service.categoryService.PublicCategoryService;
 
+import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
 import java.util.Set;
 
 @RestController
@@ -17,8 +19,10 @@ public class PublicCategoryController {
     private static final String CONTROLLER_LOG = "Публичный контроллер категорий получил запрос на {}{}";
 
     @GetMapping
-    public Set<CategoryDto> getCategories(@RequestParam(value = "from", defaultValue = "0") Integer from,
-                                          @RequestParam(value = "size", defaultValue = "10") Integer size) {
+    public Set<CategoryDto> getCategories(@PositiveOrZero @RequestParam(value = "from", defaultValue = "0")
+                                              Integer from,
+                                          @Positive @RequestParam(value = "size", defaultValue = "10")
+                                          Integer size) {
         log.info(CONTROLLER_LOG, "получение списка категорий", "");
         return publicService.getCategories(from, size);
     }

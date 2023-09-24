@@ -12,6 +12,7 @@ import ru.practicum.exploreWithMe.commonFiles.exception.fourHundredFour.Category
 import ru.practicum.exploreWithMe.commonFiles.utils.ExploreWithMePageable;
 
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -24,8 +25,9 @@ public class PublicCategoryServiceImpl implements PublicCategoryService {
     public Set<CategoryDto> getCategories(Integer from, Integer size) {
         log.info(SERVICE_LOG, "получение списка категорий", "");
         return categoryRepository.findAll(new ExploreWithMePageable(from, size, Sort.by("id").ascending()))
+                .stream()
                 .map(CategoryMapper::toDto)
-                .toSet();
+                .collect(Collectors.toSet());
     }
 
     public CategoryDto getCategoryInfo(Long categoryId) {
