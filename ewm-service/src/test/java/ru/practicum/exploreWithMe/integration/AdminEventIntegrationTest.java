@@ -20,7 +20,6 @@ import ru.practicum.exploreWithMe.commonFiles.user.dto.NewUserRequest;
 import ru.practicum.exploreWithMe.privatePackage.service.eventService.PrivateEventServiceImpl;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
