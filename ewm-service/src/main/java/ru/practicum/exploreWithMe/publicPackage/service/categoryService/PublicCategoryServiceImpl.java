@@ -11,6 +11,7 @@ import ru.practicum.exploreWithMe.commonFiles.category.utils.CategoryMapper;
 import ru.practicum.exploreWithMe.commonFiles.exception.fourHundredFour.CategoryExistException;
 import ru.practicum.exploreWithMe.commonFiles.utils.ExploreWithMePageable;
 
+import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -24,10 +25,9 @@ public class PublicCategoryServiceImpl implements PublicCategoryService {
 
     public Set<CategoryDto> getCategories(Integer from, Integer size) {
         log.info(SERVICE_LOG, "получение списка категорий", "");
-        return categoryRepository.findAll(new ExploreWithMePageable(from, size, Sort.by("id").ascending()))
-                .stream()
-                .map(CategoryMapper::toDto)
-                .collect(Collectors.toSet());
+        return categoryRepository
+                .findAll(new ExploreWithMePageable(from, size, Sort.by("id").ascending())).stream()
+                .map(CategoryMapper::toDto).collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
     public CategoryDto getCategoryInfo(Long categoryId) {

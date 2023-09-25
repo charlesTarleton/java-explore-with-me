@@ -43,10 +43,10 @@ public class AdminCompilationServiceImpl implements AdminCompilationService {
     public CompilationDto updateCompilation(Long compilationId, UpdateCompilationRequest compilationDto) {
         log.info(SERVER_LOG, "изменение добавленной подборки событий с id: ", compilationId);
         Compilation oldCompilation = checkCompilationIsExist(compilationId);
-        return CompilationMapper.toDto(CompilationMapper
-                        .toCompilation(compilationId, compilationDto,
-                                getEventSet(compilationDto.getEvents()),
-                                oldCompilation));
+        return CompilationMapper.toDto(compilationRepository.save(CompilationMapper
+                .toCompilation(compilationId, compilationDto,
+                        getEventSet(compilationDto.getEvents()),
+                        oldCompilation)));
     }
 
     private Compilation checkCompilationIsExist(Long compilationId) {
