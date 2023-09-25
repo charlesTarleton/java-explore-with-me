@@ -34,11 +34,17 @@ public class StatsServerServiceImpl implements StatsServerService {
     public List<ViewStatsDto> getStatistic(String startStr, String endStr, String[] incorrectUris, boolean unique) {
         log.info(SERVICE_LOG, "получение элементов статистики с параметрами:", "\nstart " + startStr +
                 "\nend " + endStr + "\nuris " + Arrays.toString(incorrectUris) + "\nunique" + unique);
-        String[] uris = updateArray(incorrectUris);
+        String[] uris;
+        if (incorrectUris != null && incorrectUris.length != 0 && incorrectUris[0].startsWith("[") &&
+                incorrectUris[0].endsWith("]")) {
+            uris = updateArray(incorrectUris);
+        } else {
+            uris = incorrectUris;
+        }
         LocalDateTime start = AppDateTimeFormatter.toDateTime(startStr);
         LocalDateTime end = AppDateTimeFormatter.toDateTime(endStr);
         if (start.isAfter(end)) {
-            throw new DateTimeValidationException("Дата начала не может быть выше даты окончания");
+            throw new DateTimeValidationException("Дата начала не может быть позднее даты окончания");
         }
 
         boolean isArrayExist = uris != null && uris.length != 0;

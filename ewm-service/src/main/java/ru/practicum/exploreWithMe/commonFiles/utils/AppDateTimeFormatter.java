@@ -9,7 +9,8 @@ import java.time.format.DateTimeParseException;
 
 @UtilityClass
 @Slf4j
-public class AppDateTimeFormatter {
+public class
+AppDateTimeFormatter {
     public static final String pattern = "yyyy-MM-dd HH:mm:ss";
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern(pattern);
 
