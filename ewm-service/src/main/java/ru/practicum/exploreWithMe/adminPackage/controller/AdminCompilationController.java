@@ -11,32 +11,33 @@ import ru.practicum.exploreWithMe.commonFiles.compilation.dto.UpdateCompilationR
 
 import javax.validation.Valid;
 
+import static ru.practicum.exploreWithMe.commonFiles.utils.ConstantaClass.Admin.COMPILATION_CONTROLLER_LOG;
+
 @RestController
 @Slf4j
 @RequestMapping("/admin/compilations")
 @RequiredArgsConstructor
 public class AdminCompilationController {
     private final AdminCompilationServiceImpl adminService;
-    private static final String CONTROLLER_LOG = "Контроллер подборок событий администратора получил запрос на {}{}";
 
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping
     public CompilationDto addCompilation(@Valid @RequestBody NewCompilationDto compilationDto) {
-        log.info(CONTROLLER_LOG, "добавление новой подборки событий: ", compilationDto);
+        log.info(COMPILATION_CONTROLLER_LOG, "добавление новой подборки событий: ", compilationDto);
         return adminService.addCompilation(compilationDto);
     }
 
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @DeleteMapping("/{compId}")
     public void deleteCompilation(@PathVariable("compId") Long compilationId) {
-        log.info(CONTROLLER_LOG, "удаление подборки событий с id: ", compilationId);
+        log.info(COMPILATION_CONTROLLER_LOG, "удаление подборки событий с id: ", compilationId);
         adminService.deleteCompilation(compilationId);
     }
 
     @PatchMapping("/{compId}")
     public CompilationDto updateCompilation(@PathVariable("compId") Long compilationId,
                                             @Valid @RequestBody UpdateCompilationRequest compilationDto) {
-        log.info(CONTROLLER_LOG, "изменение добавленной подборки событий с id: ", compilationId);
+        log.info(COMPILATION_CONTROLLER_LOG, "изменение добавленной подборки событий с id: ", compilationId);
         return adminService.updateCompilation(compilationId, compilationDto);
     }
 }

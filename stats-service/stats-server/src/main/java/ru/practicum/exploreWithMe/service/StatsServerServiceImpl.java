@@ -8,7 +8,6 @@ import ru.practicum.exploreWithMe.dto.*;
 import ru.practicum.exploreWithMe.exception.DateTimeValidationException;
 import ru.practicum.exploreWithMe.model.ViewStats;
 import ru.practicum.exploreWithMe.repository.StatsServerRepository;
-import ru.practicum.exploreWithMe.utils.AppDateTimeFormatter;
 import ru.practicum.exploreWithMe.utils.EndpointHitMapper;
 import ru.practicum.exploreWithMe.utils.ViewStatsMapper;
 
@@ -31,9 +30,10 @@ public class StatsServerServiceImpl implements StatsServerService {
     }
 
     @Transactional(readOnly = true)
-    public List<ViewStatsDto> getStatistic(String startStr, String endStr, String[] incorrectUris, boolean unique) {
-        log.info(SERVICE_LOG, "получение элементов статистики с параметрами:", "\nstart " + startStr +
-                "\nend " + endStr + "\nuris " + Arrays.toString(incorrectUris) + "\nunique" + unique);
+    public List<ViewStatsDto> getStatistic(LocalDateTime start, LocalDateTime end,
+                                           String[] incorrectUris, boolean unique) {
+        log.info(SERVICE_LOG, "получение элементов статистики с параметрами:", "\nstart " + start +
+                "\nend " + end + "\nuris " + Arrays.toString(incorrectUris) + "\nunique" + unique);
         String[] uris;
         if (incorrectUris != null && incorrectUris.length != 0 && incorrectUris[0].startsWith("[") &&
                 incorrectUris[0].endsWith("]")) {
@@ -41,8 +41,6 @@ public class StatsServerServiceImpl implements StatsServerService {
         } else {
             uris = incorrectUris;
         }
-        LocalDateTime start = AppDateTimeFormatter.toDateTime(startStr);
-        LocalDateTime end = AppDateTimeFormatter.toDateTime(endStr);
         if (start.isAfter(end)) {
             throw new DateTimeValidationException("Дата начала не может быть позднее даты окончания");
         }

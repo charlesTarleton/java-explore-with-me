@@ -11,9 +11,9 @@ import ru.practicum.exploreWithMe.adminPackage.service.eventService.AdminEventSe
 import ru.practicum.exploreWithMe.adminPackage.service.userService.AdminUserServiceImpl;
 import ru.practicum.exploreWithMe.commonFiles.category.dto.NewCategoryDto;
 import ru.practicum.exploreWithMe.commonFiles.event.dto.EventFullDto;
+import ru.practicum.exploreWithMe.commonFiles.event.dto.LocationDto;
 import ru.practicum.exploreWithMe.commonFiles.event.dto.NewEventDto;
 import ru.practicum.exploreWithMe.commonFiles.event.dto.UpdateEventAdminRequest;
-import ru.practicum.exploreWithMe.commonFiles.event.model.Location;
 import ru.practicum.exploreWithMe.commonFiles.event.utils.AdminAction;
 import ru.practicum.exploreWithMe.commonFiles.event.utils.EventState;
 import ru.practicum.exploreWithMe.commonFiles.user.dto.NewUserRequest;
@@ -38,16 +38,16 @@ public class AdminEventIntegrationTest {
         userService.addUser(new NewUserRequest("Имя", "email1@mail.ru"));
         categoryService.addCategory(new NewCategoryDto("Категория"));
 
-        privateEventService.addEvent(1L, new NewEventDto("Аннотация", 1L,
-                "Описание", LocalDateTime.now().plusDays(2), new Location(null, 10.4f, 11.6f),
+        privateEventService.addEvent(1L, new NewEventDto("Аннотаци", 1L,
+                "Описание", LocalDateTime.now().plusDays(2), new LocationDto(10.4f, 11.6f),
                 true, 10L, true, "Заголовок события"));
         EventFullDto updateEvent = adminEventService.updateEvent(1L,
                 new UpdateEventAdminRequest("Аннотация", 1L, "Описание",
-                        LocalDateTime.now().plusDays(2), new Location(null, 10.4f, 11.6f),
+                        LocalDateTime.now().plusDays(2), new LocationDto(10.4f, 11.6f),
                 true, 10L, true, AdminAction.PUBLISH_EVENT, "Заголовок события"));
 
-        assertEquals(1L, updateEvent.getId());
-        assertEquals("Аннотация", updateEvent.getAnnotation());
+        assertEquals(1L, updateEvent.getEventShortDto().getId());
+        assertEquals("Аннотация", updateEvent.getEventShortDto().getAnnotation());
         assertEquals(EventState.PUBLISHED, updateEvent.getState());
     }
 }

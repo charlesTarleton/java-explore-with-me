@@ -16,7 +16,6 @@ import ru.practicum.exploreWithMe.commonFiles.event.utils.EventSort;
 import ru.practicum.exploreWithMe.commonFiles.event.utils.EventState;
 import ru.practicum.exploreWithMe.commonFiles.exception.fourHundred.EventDateTimeRangeException;
 import ru.practicum.exploreWithMe.commonFiles.exception.fourHundredFour.EventExistException;
-import ru.practicum.exploreWithMe.commonFiles.utils.AppDateTimeFormatter;
 import ru.practicum.exploreWithMe.commonFiles.utils.ExploreWithMePageable;
 import ru.practicum.exploreWithMe.dto.EndpointHitDto;
 
@@ -25,6 +24,8 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static ru.practicum.exploreWithMe.commonFiles.utils.ConstantaClass.Public.EVENT_SERVICE_LOG;
+
 @Service
 @Slf4j
 @RequiredArgsConstructor
@@ -32,16 +33,15 @@ import java.util.stream.Collectors;
 public class PublicEventServiceImpl implements PublicEventService {
     private final EventRepository eventRepository;
     private final StatsClient client;
-    private static final String SERVICE_LOG = "Публичный сервис событий получил запрос на {}{}";
     private static final LocalDateTime INTERNET_BIRTHDAY = LocalDateTime
             .of(1969, 10, 29, 21, 0, 0);
 
     @Transactional(readOnly = true)
     public List<EventShortDto> getEventsWithFiltration(String text, Long[] categories, Boolean paid,
-                                                       String rangeStartStr, String rangeEndStr,
+                                                       LocalDateTime rangeStart, LocalDateTime rangeEnd,
                                                        Boolean onlyAvailable, EventSort sort, Integer from,
                                                        Integer size, HttpServletRequest request) {
-        log.info(SERVICE_LOG, "поиск событий по фильтру пользователя", "");
+        log.info(EVENT_SERVICE_LOG, "поиск событий по фильтру пользователя", "");
         client.saveStatistic(new EndpointHitDto(request.getRequestURI(),
                 request.getRemoteAddr(), LocalDateTime.now()));
         Pageable pageable = new ExploreWithMePageable(from, size, Sort.unsorted());
@@ -54,8 +54,6 @@ public class PublicEventServiceImpl implements PublicEventService {
                     pageable = new ExploreWithMePageable(from, size, Sort.by("views").descending());
             }
         }
-        LocalDateTime rangeStart = AppDateTimeFormatter.toDateTime(rangeStartStr);
-        LocalDateTime rangeEnd = AppDateTimeFormatter.toDateTime(rangeEndStr);
         List<Event> eventList = eventRepository.getEventsWithFiltration(text, Set.of(categories),
                 paid, onlyAvailable, pageable);
         if (rangeStart == null || rangeEnd == null) {
@@ -75,6 +73,7 @@ public class PublicEventServiceImpl implements PublicEventService {
     }
 
     public EventFullDto getEvent(Long eventId, HttpServletRequest request) {
+        log.info(EVENT_SERVICE_LOG, "получение расширенной информации о событии с id: ", eventId);
         client.saveStatistic(new EndpointHitDto(request.getRequestURI(),
                 request.getRemoteAddr(), LocalDateTime.now()));
         int views = checkViewsCount(request);

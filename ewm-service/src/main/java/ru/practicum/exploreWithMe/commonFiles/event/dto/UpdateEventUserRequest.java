@@ -5,13 +5,13 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import ru.practicum.exploreWithMe.commonFiles.event.model.Location;
 import ru.practicum.exploreWithMe.commonFiles.event.utils.UserAction;
 
+import javax.validation.Valid;
 import javax.validation.constraints.Size;
 import java.time.LocalDateTime;
 
-import static ru.practicum.exploreWithMe.commonFiles.utils.AppDateTimeFormatter.pattern;
+import static ru.practicum.exploreWithMe.commonFiles.utils.ConstantaClass.Common.PATTERN;
 
 @Setter
 @Getter
@@ -26,10 +26,11 @@ public class UpdateEventUserRequest {
     @Size(min = 20, max = 7000)
     private String description;
 
-    @JsonFormat(pattern = pattern)
+    @JsonFormat(pattern = PATTERN)
     private LocalDateTime eventDate;
 
-    private Location location;
+    @Valid
+    private LocationDto location;
 
     private Boolean paid;
 

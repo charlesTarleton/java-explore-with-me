@@ -19,11 +19,15 @@ import ru.practicum.exploreWithMe.service.StatsServerService;
 
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -58,14 +62,15 @@ public class StatsServerControllerTest {
 
     @Test
     void shouldGetStatistic() throws Exception {
-        String startStr = LocalDateTime.now().minusDays(1).toString();
-        String endStr = LocalDateTime.now().plusDays(1).toString();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        LocalDateTime start = LocalDateTime.now().minusDays(1);
+        LocalDateTime end = LocalDateTime.now().plusDays(1);
         String[] uris = new String[]{"uri"};
-        when(statisticService.getStatistic(startStr, endStr, uris, false))
+        when(statisticService.getStatistic(any(LocalDateTime.class), any(LocalDateTime.class), any(), anyBoolean()))
                 .thenReturn(List.of(new ViewStatsDto("app", "uri", 1)));
         mvc.perform(get("/stats")
-                        .param("start", startStr)
-                        .param("end", endStr)
+                        .param("start", start.format(formatter))
+                        .param("end", end.format(formatter))
                         .param("uris", uris)
                         .param("unique", "false"))
                 .andExpect(status().isOk())

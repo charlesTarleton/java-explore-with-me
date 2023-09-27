@@ -5,14 +5,13 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import ru.practicum.exploreWithMe.commonFiles.event.model.Location;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.time.LocalDateTime;
 
-import static ru.practicum.exploreWithMe.commonFiles.utils.AppDateTimeFormatter.pattern;
+import static ru.practicum.exploreWithMe.commonFiles.utils.ConstantaClass.Common.PATTERN;
 
 @Setter
 @Getter
@@ -31,11 +30,11 @@ public class NewEventDto {
     private String description;
 
     @NotNull
-    @JsonFormat(pattern = pattern)
+    @JsonFormat(pattern = PATTERN)
     private LocalDateTime eventDate;
 
     @NotNull
-    private Location location;
+    private LocationDto location;
 
     private Boolean paid;
 

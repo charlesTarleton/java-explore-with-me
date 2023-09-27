@@ -16,8 +16,9 @@ import ru.practicum.exploreWithMe.commonFiles.exception.fourHundredFour.Compilat
 import ru.practicum.exploreWithMe.commonFiles.exception.fourHundredFour.EventExistException;
 
 import java.util.HashSet;
-import java.util.Optional;
 import java.util.Set;
+
+import static ru.practicum.exploreWithMe.commonFiles.utils.ConstantaClass.Admin.COMPILATION_SERVICE_LOG;
 
 @Service
 @Slf4j
@@ -26,22 +27,21 @@ import java.util.Set;
 public class AdminCompilationServiceImpl implements AdminCompilationService {
     private final CompilationRepository compilationRepository;
     private final EventRepository eventRepository;
-    private static final String SERVER_LOG = "Сервис подборок событий администратора получил запрос на {}{}";
 
     public CompilationDto addCompilation(NewCompilationDto compilationDto) {
-        log.info(SERVER_LOG, "добавление новой подборки событий: ", compilationDto);
+        log.info(COMPILATION_SERVICE_LOG, "добавление новой подборки событий: ", compilationDto);
         return CompilationMapper.toDto(compilationRepository.save(CompilationMapper
                         .toCompilation(compilationDto, getEventSet(compilationDto.getEvents()))));
     }
 
     public void deleteCompilation(Long compilationId) {
-        log.info(SERVER_LOG, "удаление подборки событий с id: ", compilationId);
+        log.info(COMPILATION_SERVICE_LOG, "удаление подборки событий с id: ", compilationId);
         checkCompilationIsExist(compilationId);
         compilationRepository.deleteById(compilationId);
     }
 
     public CompilationDto updateCompilation(Long compilationId, UpdateCompilationRequest compilationDto) {
-        log.info(SERVER_LOG, "изменение добавленной подборки событий с id: ", compilationId);
+        log.info(COMPILATION_SERVICE_LOG, "изменение добавленной подборки событий с id: ", compilationId);
         Compilation oldCompilation = checkCompilationIsExist(compilationId);
         return CompilationMapper.toDto(compilationRepository.save(CompilationMapper
                 .toCompilation(compilationId, compilationDto,
@@ -51,11 +51,8 @@ public class AdminCompilationServiceImpl implements AdminCompilationService {
 
     private Compilation checkCompilationIsExist(Long compilationId) {
         log.info("Начата процедура проверки наличия подборки событий с id: {}", compilationId);
-        Optional<Compilation> compilation = compilationRepository.findById(compilationId);
-        if (compilation.isEmpty()) {
-            throw new CompilationExistException("Указанная подборка событий не найдена");
-        }
-        return compilation.get();
+        return compilationRepository.findById(compilationId)
+                .orElseThrow(() -> new CompilationExistException("Указанная подборка событий не найдена"));
     }
 
     private Set<Event> getEventSet(Set<Long> events) {

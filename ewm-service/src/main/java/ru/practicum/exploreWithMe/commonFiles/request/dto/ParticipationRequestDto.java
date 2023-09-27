@@ -8,13 +8,13 @@ import ru.practicum.exploreWithMe.commonFiles.request.utils.RequestStatus;
 
 import java.time.LocalDateTime;
 
-import static ru.practicum.exploreWithMe.commonFiles.utils.AppDateTimeFormatter.pattern;
+import static ru.practicum.exploreWithMe.commonFiles.utils.ConstantaClass.Common.PATTERN;
 
 @Getter
 @RequiredArgsConstructor
 @AllArgsConstructor
 public class ParticipationRequestDto {
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = pattern)
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = PATTERN)
     private LocalDateTime created;
 
     private Long event;

@@ -9,7 +9,8 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import ru.practicum.exploreWithMe.commonFiles.category.dto.CategoryDto;
 import ru.practicum.exploreWithMe.commonFiles.event.dto.EventFullDto;
-import ru.practicum.exploreWithMe.commonFiles.event.model.Location;
+import ru.practicum.exploreWithMe.commonFiles.event.dto.EventShortDto;
+import ru.practicum.exploreWithMe.commonFiles.event.dto.LocationDto;
 import ru.practicum.exploreWithMe.commonFiles.event.utils.EventState;
 import ru.practicum.exploreWithMe.commonFiles.user.dto.UserShortDto;
 import ru.practicum.exploreWithMe.publicPackage.service.eventService.PublicEventServiceImpl;
@@ -40,10 +41,11 @@ public class PublicEventControllerTest {
         MockMvc mvc = MockMvcBuilders.standaloneSetup(eventController).build();
 
         EventFullDto eventDto = new EventFullDto(
-        "Аннотация", new CategoryDto(), 2L, LocalDateTime.now().minusDays(1),
-                "Описание", LocalDateTime.now().plusDays(2), 3L, new UserShortDto(),
-                new Location(), true, 10L, LocalDateTime.now(), true,
-                EventState.PUBLISHED, "Заголовок события", 11);
+                new EventShortDto("Аннотация", new CategoryDto(), 2L,
+                        LocalDateTime.now().plusDays(2), 3L, new UserShortDto(), true,
+                        "Заголовок события", 11),
+                LocalDateTime.now().minusDays(1), "Описание", new LocationDto(),
+                10L, LocalDateTime.now(), true, EventState.PUBLISHED);
 
         when(eventService.getEvent(anyLong(), any(HttpServletRequest.class))).thenReturn(eventDto);
 
@@ -66,5 +68,4 @@ public class PublicEventControllerTest {
                 .andExpect(jsonPath("$.title", is("Заголовок события")))
                 .andExpect(jsonPath("$.views", is(11)));
     }
-
 }

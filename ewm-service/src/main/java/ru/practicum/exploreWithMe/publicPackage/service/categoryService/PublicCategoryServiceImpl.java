@@ -15,23 +15,24 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static ru.practicum.exploreWithMe.commonFiles.utils.ConstantaClass.Public.CATEGORY_SERVICE_LOG;
+
 @Service
 @Slf4j
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class PublicCategoryServiceImpl implements PublicCategoryService {
     private final CategoryRepository categoryRepository;
-    private static final String SERVICE_LOG = "Публичный сервис категорий получил запрос на {}{}";
 
     public Set<CategoryDto> getCategories(Integer from, Integer size) {
-        log.info(SERVICE_LOG, "получение списка категорий", "");
+        log.info(CATEGORY_SERVICE_LOG, "получение списка категорий", "");
         return categoryRepository
                 .findAll(new ExploreWithMePageable(from, size, Sort.by("id").ascending())).stream()
                 .map(CategoryMapper::toDto).collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
     public CategoryDto getCategoryInfo(Long categoryId) {
-        log.info(SERVICE_LOG, "получение категории с id: ", categoryId);
+        log.info(CATEGORY_SERVICE_LOG, "получение категории с id: ", categoryId);
         return CategoryMapper.toDto(categoryRepository.findById(categoryId)
                 .orElseThrow(() -> new CategoryExistException("Указанная категория не найдена")));
     }

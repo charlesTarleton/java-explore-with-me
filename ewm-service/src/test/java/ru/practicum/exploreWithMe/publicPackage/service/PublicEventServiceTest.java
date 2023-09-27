@@ -56,12 +56,12 @@ public class PublicEventServiceTest {
         when(client.getStatistic(any(), any(), any(), anyBoolean())).thenReturn(response);
 
         EventFullDto eventDto = eventService.getEvent(1L, request);
-        assertEquals(1L, eventDto.getId());
-        assertEquals("Аннотация", eventDto.getAnnotation());
-        assertEquals(3L, eventDto.getCategory().getId());
-        assertEquals(2L, eventDto.getConfirmedRequests());
-        assertEquals(2L, eventDto.getInitiator().getId());
+        assertEquals(1L, eventDto.getEventShortDto().getId());
+        assertEquals("Аннотация", eventDto.getEventShortDto().getAnnotation());
+        assertEquals(3L, eventDto.getEventShortDto().getCategory().getId());
+        assertEquals(2L, eventDto.getEventShortDto().getConfirmedRequests());
+        assertEquals(2L, eventDto.getEventShortDto().getInitiator().getId());
         assertEquals("Описание", eventDto.getDescription());
-        assertEquals(11, eventDto.getViews());
+        assertEquals(11, eventDto.getEventShortDto().getViews());
     }
 }

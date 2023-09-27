@@ -24,8 +24,9 @@ import ru.practicum.exploreWithMe.commonFiles.user.model.User;
 import ru.practicum.exploreWithMe.commonFiles.user.repository.UserRepository;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
+
+import static ru.practicum.exploreWithMe.commonFiles.utils.ConstantaClass.Private.REQUEST_SERVICE_LOG;
 
 @Service
 @Slf4j
@@ -35,11 +36,10 @@ public class PrivateRequestServiceImpl implements PrivateRequestService {
     private final UserRepository userRepository;
     private final RequestRepository requestRepository;
     private final EventRepository eventRepository;
-    private static final String SERVICE_LOG = "Частный сервис запросов получил запрос на {}{}";
 
     @Transactional(readOnly = true)
     public List<ParticipationRequestDto> getUserRequests(Long userId) {
-        log.info(SERVICE_LOG, "получение всех запросов на участие в событиях от пользователя с id: ", userId);
+        log.info(REQUEST_SERVICE_LOG, "получение всех запросов на участие в событиях от пользователя с id: ", userId);
         checkUserIsExist(userId);
         return requestRepository.getUserRequests(userId).stream()
                 .map(RequestMapper::toDto)
@@ -47,7 +47,7 @@ public class PrivateRequestServiceImpl implements PrivateRequestService {
     }
 
     public ParticipationRequestDto addRequest(Long userId, Long eventId) {
-        log.info(SERVICE_LOG, "добавление запроса на участие в событии с id: ", eventId);
+        log.info(REQUEST_SERVICE_LOG, "добавление запроса на участие в событии с id: ", eventId);
         User user = checkUserIsExist(userId);
         Event event = checkEventIsExist(eventId);
         checkUserIsEventInitiator(userId, event.getInitiator().getId());
@@ -68,7 +68,7 @@ public class PrivateRequestServiceImpl implements PrivateRequestService {
     }
 
     public ParticipationRequestDto cancelRequest(Long userId, Long requestId) {
-        log.info(SERVICE_LOG, "отмену запроса с id: ", requestId);
+        log.info(REQUEST_SERVICE_LOG, "отмену запроса с id: ", requestId);
         checkUserIsExist(userId);
         Request request = checkRequestIsExist(requestId);
         checkUserIsRequester(userId, request.getRequester().getId());
@@ -90,29 +90,20 @@ public class PrivateRequestServiceImpl implements PrivateRequestService {
 
     private User checkUserIsExist(Long userId) {
         log.info("Начата процедура проверки наличия пользователя с id: {}", userId);
-        Optional<User> user = userRepository.findById(userId);
-        if (user.isEmpty()) {
-            throw new UserExistException("Указанный пользователь не найден");
-        }
-        return user.get();
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new UserExistException("Указанный пользователь не найден"));
     }
 
     private Request checkRequestIsExist(Long requestId) {
         log.info("Начата процедура проверки наличия запроса на участие в событии с id: {}", requestId);
-        Optional<Request> request = requestRepository.findById(requestId);
-        if (request.isEmpty()) {
-            throw new RequestExistException("Указанный запрос на участие в событии не найден");
-        }
-        return request.get();
+        return requestRepository.findById(requestId)
+                .orElseThrow(() -> new RequestExistException("Указанный запрос на участие в событии не найден"));
     }
 
     private Event checkEventIsExist(Long eventId) {
         log.info("Начата процедура проверки наличия события с id: {}", eventId);
-        Optional<Event> event = eventRepository.findById(eventId);
-        if (event.isEmpty()) {
-            throw new EventExistException("Указанное событие не найдено");
-        }
-        return event.get();
+        return eventRepository.findById(eventId)
+                .orElseThrow(() -> new EventExistException("Указанное событие не найдено"));
     }
 
     private void checkEventIsPublished(Event event) {
@@ -143,8 +134,7 @@ public class PrivateRequestServiceImpl implements PrivateRequestService {
 
     private void checkIsUserRepeatRequest(Long userId, Long eventId) {
         log.info("Начата процедура проверки на повторный запрос от пользователя");
-        Optional<Request> request = requestRepository.getUserEventRequest(eventId, userId);
-        if (request.isPresent()) {
+        if (requestRepository.getUserEventRequest(eventId, userId).isPresent()) {
             throw new RequestRepeatException("Пользователь направил повторный запрос");
         }
     }

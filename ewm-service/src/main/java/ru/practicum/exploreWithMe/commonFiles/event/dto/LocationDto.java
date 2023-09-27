@@ -1,19 +1,18 @@
-package ru.practicum.exploreWithMe.commonFiles.user.dto;
+package ru.practicum.exploreWithMe.commonFiles.event.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
-public class UserShortDto {
+public class LocationDto {
     @NotNull
-    private Long id;
+    private Float lat;
 
-    @NotBlank
-    private String name;
+    @NotNull
+    private Float lon;
 }

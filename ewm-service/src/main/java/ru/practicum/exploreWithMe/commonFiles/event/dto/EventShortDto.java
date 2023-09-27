@@ -7,9 +7,10 @@ import lombok.NoArgsConstructor;
 import ru.practicum.exploreWithMe.commonFiles.category.dto.CategoryDto;
 import ru.practicum.exploreWithMe.commonFiles.user.dto.UserShortDto;
 
+import javax.validation.Valid;
 import java.time.LocalDateTime;
 
-import static ru.practicum.exploreWithMe.commonFiles.utils.AppDateTimeFormatter.pattern;
+import static ru.practicum.exploreWithMe.commonFiles.utils.ConstantaClass.Common.PATTERN;
 
 @Getter
 @AllArgsConstructor
@@ -17,15 +18,17 @@ import static ru.practicum.exploreWithMe.commonFiles.utils.AppDateTimeFormatter.
 public class EventShortDto {
     private String annotation;
 
+    @Valid
     private CategoryDto category;
 
     private Long confirmedRequests;
 
-    @JsonFormat(pattern = pattern)
+    @JsonFormat(pattern = PATTERN)
     private LocalDateTime eventDate;
 
     private Long id;
 
+    @Valid
     private UserShortDto initiator;
 
     private Boolean paid;

@@ -14,16 +14,17 @@ import ru.practicum.exploreWithMe.commonFiles.utils.ExploreWithMePageable;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static ru.practicum.exploreWithMe.commonFiles.utils.ConstantaClass.Public.COMPILATION_SERVICE_LOG;
+
 @Service
 @Slf4j
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class PublicCompilationServiceImpl implements PublicCompilationService {
     private final CompilationRepository compilationRepository;
-    private static final String SERVICE_LOG = "Публичный сервис подборок событий получил запрос на {}{}";
 
     public List<CompilationDto> getCompilations(Boolean pinned, Integer from, Integer size) {
-        log.info(SERVICE_LOG, "поиск подборок событий", "");
+        log.info(COMPILATION_SERVICE_LOG, "поиск подборок событий", "");
         return compilationRepository
                 .getCompilations(pinned, new ExploreWithMePageable(from, size, Sort.unsorted())).stream()
                 .map(CompilationMapper::toDto)
@@ -31,7 +32,7 @@ public class PublicCompilationServiceImpl implements PublicCompilationService {
     }
 
     public CompilationDto getCompilation(Long compilationId) {
-        log.info(SERVICE_LOG, "получение подборки событий с id: ", compilationId);
+        log.info(COMPILATION_SERVICE_LOG, "получение подборки событий с id: ", compilationId);
         return CompilationMapper.toDto(compilationRepository.findById(compilationId)
                 .orElseThrow(() -> new CompilationExistException("Указанная подборка событий не найдена")));
     }

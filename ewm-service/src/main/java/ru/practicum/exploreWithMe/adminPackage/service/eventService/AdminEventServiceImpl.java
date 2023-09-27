@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.exploreWithMe.commonFiles.category.model.Category;
 import ru.practicum.exploreWithMe.commonFiles.category.repository.CategoryRepository;
 import ru.practicum.exploreWithMe.commonFiles.event.dto.EventFullDto;
+import ru.practicum.exploreWithMe.commonFiles.event.dto.LocationDto;
 import ru.practicum.exploreWithMe.commonFiles.event.dto.UpdateEventAdminRequest;
 import ru.practicum.exploreWithMe.commonFiles.event.model.Event;
 import ru.practicum.exploreWithMe.commonFiles.event.model.Location;
@@ -16,12 +17,12 @@ import ru.practicum.exploreWithMe.commonFiles.event.repository.LocationRepositor
 import ru.practicum.exploreWithMe.commonFiles.event.utils.AdminAction;
 import ru.practicum.exploreWithMe.commonFiles.event.utils.EventMapper;
 import ru.practicum.exploreWithMe.commonFiles.event.utils.EventState;
+import ru.practicum.exploreWithMe.commonFiles.event.utils.LocationMapper;
 import ru.practicum.exploreWithMe.commonFiles.exception.fourHundred.EventDateTimePastException;
 import ru.practicum.exploreWithMe.commonFiles.exception.fourHundredNine.EventDateTimeException;
 import ru.practicum.exploreWithMe.commonFiles.exception.fourHundredNine.EventUpdateStateException;
 import ru.practicum.exploreWithMe.commonFiles.exception.fourHundredFour.CategoryExistException;
 import ru.practicum.exploreWithMe.commonFiles.exception.fourHundredFour.EventExistException;
-import ru.practicum.exploreWithMe.commonFiles.utils.AppDateTimeFormatter;
 import ru.practicum.exploreWithMe.commonFiles.utils.ExploreWithMePageable;
 
 import java.time.LocalDateTime;
@@ -30,6 +31,10 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static ru.practicum.exploreWithMe.commonFiles.utils.ConstantaClass.Admin.EVENT_SERVICE_LOG;
+import static ru.practicum.exploreWithMe.commonFiles.utils.ConstantaClass.Admin.REQUIREMENT_HOURS_COUNT;
 
 @Service
 @Slf4j
@@ -39,57 +44,54 @@ public class AdminEventServiceImpl implements AdminEventService {
     private final EventRepository eventRepository;
     private final CategoryRepository categoryRepository;
     private final LocationRepository locationRepository;
-    private static final String SERVICE_LOG = "Сервис событий администратора получил запрос на {}{}";
-    private static final byte REQUIREMENT_HOURS_COUNT = 1;
 
     @Transactional(readOnly = true)
     public List<EventFullDto> getEventsWithSettings(Long[] users, String[] states, Long[] categories,
-                                                    String rangeStartStr, String rangeEndStr, Integer from,
+                                                    LocalDateTime rangeStart, LocalDateTime rangeEnd, Integer from,
                                                     Integer size) {
-        log.info(SERVICE_LOG, "получение списка событий по параметрам", "");
+        log.info(EVENT_SERVICE_LOG, "получение списка событий по параметрам", "");
         Set<Long> usersSet = null;
         if (users != null) {
             usersSet = Set.of(users);
         }
-        Set<EventState> statesSet = checkStateArray(states);
+        Set<EventState> statesSet = null;
+        if (states != null) {
+            statesSet = Arrays.stream(states)
+                    .map(EventState::valueOf)
+                    .collect(Collectors.toSet());
+        }
         Set<Long> categoriesSet = null;
         if (categories != null) {
             categoriesSet = Set.of(categories);
         }
-        LocalDateTime rangeStart = AppDateTimeFormatter.toDateTime(rangeStartStr);
-        LocalDateTime rangeEnd = AppDateTimeFormatter.toDateTime(rangeEndStr);
         checkSearchDateTime(rangeStart, rangeEnd);
         List<Event> eventList = eventRepository.getEventsWithSettings(usersSet, statesSet, categoriesSet,
                 new ExploreWithMePageable(from, size, Sort.unsorted()));
+        Stream<Event> eventStream;
         if (rangeStart != null && rangeEnd != null) {
-            return eventList.stream()
-                    .filter(event -> event.getEventDate().isAfter(rangeStart)
-                            && event.getEventDate().isBefore(rangeEnd))
-                    .map(EventMapper::toFullDto)
-                    .collect(Collectors.toList());
+            eventStream = eventList.stream().filter(event -> event.getEventDate().isAfter(rangeStart)
+                    && event.getEventDate().isBefore(rangeEnd));
         } else if (rangeStart != null) {
-            return eventList.stream()
-                    .filter(event -> event.getEventDate().isAfter(rangeStart))
-                    .map(EventMapper::toFullDto)
-                    .collect(Collectors.toList());
+            eventStream = eventList.stream().filter(event -> event.getEventDate().isAfter(rangeStart));
         } else if (rangeEnd != null) {
-            return eventList.stream()
-                    .filter(event -> event.getEventDate().isBefore(rangeEnd))
-                    .map(EventMapper::toFullDto)
-                    .collect(Collectors.toList());
+            eventStream = eventList.stream().filter(event -> event.getEventDate().isBefore(rangeEnd));
         } else {
-            return eventList.stream()
-                    .map(EventMapper::toFullDto)
-                    .collect(Collectors.toList());
+            eventStream = eventList.stream();
         }
+        return eventStream.map(EventMapper::toFullDto).collect(Collectors.toList());
     }
 
     public EventFullDto updateEvent(Long eventId, UpdateEventAdminRequest eventDto) {
-        log.info(SERVICE_LOG, "изменение события с id: ", eventId);
+        log.info(EVENT_SERVICE_LOG, "изменение события с id: ", eventId);
         Category category;
         Event oldEvent = checkEventIsExist(eventId);
-        if (eventDto.getLocation() != null) {
-            eventDto.setLocation(checkLocationIsExist(eventDto.getLocation()));
+        Location location;
+        if (eventDto.getLocation() != null &&
+                eventDto.getLocation().getLat() != null &&
+                eventDto.getLocation().getLon() != null) {
+            location = checkLocationIsExist(eventDto.getLocation());
+        } else {
+            location = oldEvent.getLocation();
         }
         if (eventDto.getCategory() != null) {
             category = checkCategoryIsExist(eventDto.getCategory());
@@ -109,29 +111,23 @@ public class AdminEventServiceImpl implements AdminEventService {
             } else {
                 checkEventDateTimeForPublish(oldEvent.getEventDate());
             }
-            event = EventMapper.toEvent(eventId, category, eventDto, oldEvent, EventState.PUBLISHED);
+            event = EventMapper.toEvent(eventId, category, eventDto, oldEvent, location, EventState.PUBLISHED);
         } else {
-            event = EventMapper.toEvent(eventId, category, eventDto, oldEvent, EventState.REJECTED);
+            event = EventMapper.toEvent(eventId, category, eventDto, oldEvent, location, EventState.REJECTED);
         }
         return EventMapper.toFullDto(eventRepository.save(event));
     }
 
     private Category checkCategoryIsExist(Long categoryId) {
         log.info("Начата процедура проверки наличия категории с id: {}", categoryId);
-        Optional<Category> category = categoryRepository.findById(categoryId);
-        if (category.isEmpty()) {
-            throw new CategoryExistException("Указанная категория не найдена");
-        }
-        return category.get();
+        return categoryRepository.findById(categoryId)
+                .orElseThrow(() -> new CategoryExistException("Указанная категория не найдена"));
     }
 
     private Event checkEventIsExist(Long eventId) {
         log.info("Начата процедура проверки наличия события с id: {}", eventId);
-        Optional<Event> event = eventRepository.findById(eventId);
-        if (event.isEmpty()) {
-            throw new EventExistException("Указанное событие не найдено");
-        }
-        return event.get();
+        return eventRepository.findById(eventId)
+                .orElseThrow(() -> new EventExistException("Указанное событие не найдено"));
     }
 
     private void checkEventDateTimeForPublish(LocalDateTime eventDateTime) {
@@ -166,33 +162,10 @@ public class AdminEventServiceImpl implements AdminEventService {
         }
     }
 
-    private Location checkLocationIsExist(Location location) {
+    private Location checkLocationIsExist(LocationDto location) {
         log.info("Начата процедура проверки наличия локации и её сохранения(при отсутствии в базе данных)");
         Optional<Location> locationOptional = locationRepository
                 .findByCoordinates(location.getLat(), location.getLon());
-        if (locationOptional.isEmpty()) {
-            location = locationRepository.save(location);
-        } else {
-            location = locationOptional.get();
-        }
-        return location;
-    }
-
-    private Set<EventState> checkStateArray(String[] states) {
-        Set<EventState> statesSet = null;
-        if (states != null) {
-            statesSet = Arrays.stream(states)
-                    .filter(state -> {
-                        try {
-                            EventState.valueOf(state);
-                            return true;
-                        } catch (IllegalArgumentException e) {
-                            return false;
-                        }
-                    })
-                    .map(EventState::valueOf)
-                    .collect(Collectors.toSet());
-        }
-        return statesSet;
+        return locationOptional.orElseGet(() -> locationRepository.save(LocationMapper.toLocation(location)));
     }
 }

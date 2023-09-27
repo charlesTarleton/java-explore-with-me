@@ -16,17 +16,18 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static ru.practicum.exploreWithMe.commonFiles.utils.ConstantaClass.Admin.USER_SERVICE_LOG;
+
 @Service
 @Slf4j
 @RequiredArgsConstructor
 @Transactional
 public class AdminUserServiceImpl implements AdminUserService {
     private final UserRepository userRepository;
-    private static final String SERVICE_LOG = "Сервис пользователей администратора получил запрос на {}{}";
 
     @Transactional(readOnly = true)
     public List<UserDto> getUsersWithSettings(Long[] users, Integer from, Integer size) {
-        log.info(SERVICE_LOG, "получение списка пользователей", "");
+        log.info(USER_SERVICE_LOG, "получение списка пользователей", "");
         Set<Long> usersSet = null;
         if (users != null) {
             usersSet = Set.of(users);
@@ -37,20 +38,19 @@ public class AdminUserServiceImpl implements AdminUserService {
     }
 
     public UserDto addUser(NewUserRequest userDto) {
-        log.info(SERVICE_LOG, "добавление нового пользователя: ", userDto);
+        log.info(USER_SERVICE_LOG, "добавление нового пользователя: ", userDto);
         return UserMapper.toDto(userRepository.save(UserMapper.toUser(userDto)));
     }
 
     public void deleteUser(Long userId) {
-        log.info(SERVICE_LOG, "удаление пользователя с id: ", userId);
+        log.info(USER_SERVICE_LOG, "удаление пользователя с id: ", userId);
         checkUserIsExist(userId);
         userRepository.deleteById(userId);
     }
 
     private void checkUserIsExist(Long userId) {
         log.info("Начата процедура проверки наличия пользователя с id: {}", userId);
-        if (userRepository.findById(userId).isEmpty()) {
-            throw new UserExistException("Указанный пользователь не найден");
-        }
+        userRepository.findById(userId)
+                .orElseThrow(() -> new UserExistException("Указанный пользователь не найден"));
     }
 }

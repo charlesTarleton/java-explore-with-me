@@ -9,7 +9,6 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.exploreWithMe.dto.EndpointHitDto;
 import ru.practicum.exploreWithMe.dto.ViewStatsDto;
 import ru.practicum.exploreWithMe.service.StatsServerServiceImpl;
-import ru.practicum.exploreWithMe.utils.AppDateTimeFormatter;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -32,8 +31,8 @@ public class StatsServerIntegrationTest {
         statisticService.saveStatistic(new EndpointHitDto("uri1", "ip",
                 LocalDateTime.now().plusDays(1)));
         List<ViewStatsDto> viewStatsDtoList = statisticService.getStatistic(
-                AppDateTimeFormatter.toString(LocalDateTime.now().minusDays(4)),
-                AppDateTimeFormatter.toString(LocalDateTime.now().plusDays(4)),
+                LocalDateTime.now().minusDays(4),
+                LocalDateTime.now().plusDays(4),
                 new String[]{"[uri1]", "[uri2]"}, false);
         assertEquals(2, viewStatsDtoList.size());
         assertEquals(2, viewStatsDtoList.get(0).getHits());

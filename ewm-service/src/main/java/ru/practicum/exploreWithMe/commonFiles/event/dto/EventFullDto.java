@@ -1,55 +1,38 @@
 package ru.practicum.exploreWithMe.commonFiles.event.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonUnwrapped;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import ru.practicum.exploreWithMe.commonFiles.category.dto.CategoryDto;
-import ru.practicum.exploreWithMe.commonFiles.event.model.Location;
 import ru.practicum.exploreWithMe.commonFiles.event.utils.EventState;
-import ru.practicum.exploreWithMe.commonFiles.user.dto.UserShortDto;
 
+import javax.validation.Valid;
 import java.time.LocalDateTime;
 
-import static ru.practicum.exploreWithMe.commonFiles.utils.AppDateTimeFormatter.pattern;
+import static ru.practicum.exploreWithMe.commonFiles.utils.ConstantaClass.Common.PATTERN;
 
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
 public class EventFullDto {
+    @JsonUnwrapped
+    private EventShortDto eventShortDto;
 
-    private String annotation;
-
-    private CategoryDto category;
-
-    private Long confirmedRequests;
-
-    @JsonFormat(pattern = pattern)
+    @JsonFormat(pattern = PATTERN)
     private LocalDateTime createdOn;
 
     private String description;
 
-    @JsonFormat(pattern = pattern)
-    private LocalDateTime eventDate;
-
-    private Long id;
-
-    private UserShortDto initiator;
-
-    private Location location;
-
-    private Boolean paid;
+    @Valid
+    private LocationDto location;
 
     private Long participantLimit;
 
-    @JsonFormat(pattern = pattern)
+    @JsonFormat(pattern = PATTERN)
     private LocalDateTime publishedOn;
 
     private Boolean requestModeration;
 
     private EventState state;
-
-    private String title;
-
-    private Integer views;
 }
