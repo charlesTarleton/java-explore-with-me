@@ -34,6 +34,7 @@ public final class ConstantaClass {
         public static final String EVENT_SERVICE_LOG = START + "сервис событий " + END;
         public static final String CATEGORY_SERVICE_LOG = START + "сервис категорий " + END;
     }
+
     public static final class Common {
         public static final String PATTERN = "yyyy-MM-dd HH:mm:ss";
     }
