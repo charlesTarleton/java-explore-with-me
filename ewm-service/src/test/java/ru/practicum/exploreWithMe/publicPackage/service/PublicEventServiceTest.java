@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockHttpServletRequest;
 import ru.practicum.exploreWithMe.client.StatsClient;
 import ru.practicum.exploreWithMe.commonFiles.category.model.Category;
+import ru.practicum.exploreWithMe.commonFiles.comment.repository.CommentRepository;
 import ru.practicum.exploreWithMe.commonFiles.event.dto.EventFullDto;
 import ru.practicum.exploreWithMe.commonFiles.event.model.Event;
 import ru.practicum.exploreWithMe.commonFiles.event.model.Location;
@@ -29,6 +30,9 @@ import static org.mockito.Mockito.when;
 public class PublicEventServiceTest {
     @Mock
     private EventRepository eventRepository;
+
+    @Mock
+    private CommentRepository commentRepository;
 
     @Mock
     private StatsClient client;
@@ -54,6 +58,7 @@ public class PublicEventServiceTest {
 
         when(eventRepository.findById(anyLong())).thenReturn(Optional.of(event));
         when(client.getStatistic(any(), any(), any(), anyBoolean())).thenReturn(response);
+        when(commentRepository.getEventComments(anyLong())).thenReturn(List.of());
 
         EventFullDto eventDto = eventService.getEvent(1L, request);
         assertEquals(1L, eventDto.getEventShortDto().getId());

@@ -5,10 +5,12 @@ import com.fasterxml.jackson.annotation.JsonUnwrapped;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import ru.practicum.exploreWithMe.commonFiles.comment.dto.CommentDto;
 import ru.practicum.exploreWithMe.commonFiles.event.utils.EventState;
 
 import javax.validation.Valid;
 import java.time.LocalDateTime;
+import java.util.List;
 
 import static ru.practicum.exploreWithMe.commonFiles.utils.ConstantaClass.Common.PATTERN;
 

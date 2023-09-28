@@ -6,6 +6,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import ru.practicum.exploreWithMe.commonFiles.category.model.Category;
+import ru.practicum.exploreWithMe.commonFiles.comment.repository.CommentRepository;
 import ru.practicum.exploreWithMe.commonFiles.compilation.dto.CompilationDto;
 import ru.practicum.exploreWithMe.commonFiles.compilation.model.Compilation;
 import ru.practicum.exploreWithMe.commonFiles.compilation.repository.CompilationRepository;
@@ -16,10 +17,12 @@ import ru.practicum.exploreWithMe.commonFiles.user.model.User;
 import ru.practicum.exploreWithMe.publicPackage.service.compilationService.PublicCompilationServiceImpl;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
 
@@ -27,6 +30,9 @@ import static org.mockito.Mockito.when;
 public class PublicCompilationServiceTest {
     @Mock
     private CompilationRepository compilationRepository;
+
+    @Mock
+    private CommentRepository commentRepository;
 
     @InjectMocks
     private PublicCompilationServiceImpl compilationService;
@@ -45,6 +51,7 @@ public class PublicCompilationServiceTest {
                                 new Location(), true, 10L,
                                 LocalDateTime.now(), true, EventState.PUBLISHED,
                                 "Заголовок события", 11)))));
+        when(commentRepository.getEventsComments(any())).thenReturn(List.of());
         CompilationDto compilationDto = compilationService.getCompilation(1L);
         assertEquals(1L, compilationDto.getId());
         assertEquals(true, compilationDto.getPinned());

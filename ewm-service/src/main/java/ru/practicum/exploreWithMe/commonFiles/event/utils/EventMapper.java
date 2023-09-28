@@ -4,6 +4,7 @@ import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
 import ru.practicum.exploreWithMe.commonFiles.category.model.Category;
 import ru.practicum.exploreWithMe.commonFiles.category.utils.CategoryMapper;
+import ru.practicum.exploreWithMe.commonFiles.comment.dto.CommentDto;
 import ru.practicum.exploreWithMe.commonFiles.event.dto.*;
 import ru.practicum.exploreWithMe.commonFiles.event.model.Event;
 import ru.practicum.exploreWithMe.commonFiles.event.model.Location;
@@ -11,6 +12,7 @@ import ru.practicum.exploreWithMe.commonFiles.user.model.User;
 import ru.practicum.exploreWithMe.commonFiles.user.utils.UserMapper;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @UtilityClass
 @Slf4j
@@ -138,10 +140,10 @@ public class EventMapper {
                 oldEvent.getViews());
     }
 
-    public EventFullDto toFullDto(Event event) {
+    public EventFullDto toFullDto(Event event, List<CommentDto> commentDtoList) {
         log.info("Начата процедура преобразования события в расширенное ДТО: {}", event);
         return new EventFullDto(
-                toShortDto(event),
+                toShortDto(event, commentDtoList),
                 event.getCreatedOn(),
                 event.getDescription(),
                 LocationMapper.toDto(event.getLocation()),
@@ -151,8 +153,11 @@ public class EventMapper {
                 event.getStateAction());
     }
 
-    public EventShortDto toShortDto(Event event) {
+    public EventShortDto toShortDto(Event event, List<CommentDto> commentDtoList) {
         log.info("Начата процедура преобразования события в сокращенное ДТО: {}", event);
+        if (commentDtoList == null) {
+            commentDtoList = List.of();
+        }
         return new EventShortDto(
                 event.getAnnotation(),
                 CategoryMapper.toDto(event.getCategory()),
@@ -162,6 +167,7 @@ public class EventMapper {
                 UserMapper.toShortDto(event.getInitiator()),
                 event.getPaid(),
                 event.getTitle(),
-                event.getViews());
+                event.getViews(),
+                commentDtoList);
     }
 }

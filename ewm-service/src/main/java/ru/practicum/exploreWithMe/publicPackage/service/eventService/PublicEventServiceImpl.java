@@ -7,6 +7,9 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.exploreWithMe.client.StatsClient;
+import ru.practicum.exploreWithMe.commonFiles.comment.dto.CommentDto;
+import ru.practicum.exploreWithMe.commonFiles.comment.repository.CommentRepository;
+import ru.practicum.exploreWithMe.commonFiles.comment.utils.CommentMapper;
 import ru.practicum.exploreWithMe.commonFiles.event.dto.EventFullDto;
 import ru.practicum.exploreWithMe.commonFiles.event.dto.EventShortDto;
 import ru.practicum.exploreWithMe.commonFiles.event.model.Event;
@@ -32,6 +35,7 @@ import static ru.practicum.exploreWithMe.commonFiles.utils.ConstantaClass.Public
 @Transactional
 public class PublicEventServiceImpl implements PublicEventService {
     private final EventRepository eventRepository;
+    private final CommentRepository commentRepository;
     private final StatsClient client;
     private static final LocalDateTime INTERNET_BIRTHDAY = LocalDateTime
             .of(1969, 10, 29, 21, 0, 0);
@@ -56,18 +60,23 @@ public class PublicEventServiceImpl implements PublicEventService {
         }
         List<Event> eventList = eventRepository.getEventsWithFiltration(text, Set.of(categories),
                 paid, onlyAvailable, pageable);
+        Map<Long, List<CommentDto>> commentMap = commentRepository.getEventsComments(eventList.stream()
+                        .map(Event::getId)
+                        .collect(Collectors.toList())).stream()
+                .map(CommentMapper::toDto)
+                .collect(Collectors.groupingBy(CommentDto::getEventId));
         if (rangeStart == null || rangeEnd == null) {
             LocalDateTime currentTime = LocalDateTime.now();
             return eventList.stream()
                     .filter(event -> event.getEventDate().isAfter(currentTime))
-                    .map(EventMapper::toShortDto)
+                    .map(event -> EventMapper.toShortDto(event, commentMap.get(event.getId())))
                     .collect(Collectors.toList());
         } else {
             checkSearchDateTime(rangeStart, rangeEnd);
             return eventList.stream()
                     .filter(event -> event.getEventDate().isAfter(rangeStart) &&
                             event.getEventDate().isBefore(rangeEnd))
-                    .map(EventMapper::toShortDto)
+                    .map(event -> EventMapper.toShortDto(event, commentMap.get(event.getId())))
                     .collect(Collectors.toList());
         }
     }
@@ -80,7 +89,10 @@ public class PublicEventServiceImpl implements PublicEventService {
         Event event = checkEventIsExist(eventId);
         event.setViews(views);
         eventRepository.save(event);
-        return EventMapper.toFullDto(event);
+        List<CommentDto> commentDtoList = commentRepository.getEventComments(eventId).stream()
+                .map(CommentMapper::toDto)
+                .collect(Collectors.toList());
+        return EventMapper.toFullDto(event, commentDtoList);
     }
 
     private void checkSearchDateTime(LocalDateTime rangeStart, LocalDateTime rangeEnd) {
