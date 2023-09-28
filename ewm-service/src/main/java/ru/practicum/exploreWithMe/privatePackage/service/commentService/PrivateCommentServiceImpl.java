@@ -15,6 +15,7 @@ import ru.practicum.exploreWithMe.commonFiles.comment.utils.CommentMapper;
 import ru.practicum.exploreWithMe.commonFiles.event.model.Event;
 import ru.practicum.exploreWithMe.commonFiles.event.repository.EventRepository;
 import ru.practicum.exploreWithMe.commonFiles.event.utils.EventState;
+import ru.practicum.exploreWithMe.commonFiles.exception.fourHundredFour.CommentExistException;
 import ru.practicum.exploreWithMe.commonFiles.exception.fourHundredFour.EventExistException;
 import ru.practicum.exploreWithMe.commonFiles.exception.fourHundredFour.UserExistException;
 import ru.practicum.exploreWithMe.commonFiles.exception.fourHundredNine.CommentAuthorException;
@@ -94,7 +95,7 @@ public class PrivateCommentServiceImpl implements PrivateCommentService {
     private Comment checkCommentIsExist(Long commentId) {
         log.info("Начата процедура проверки наличия комментария с id: {}", commentId);
 		return commentRepository.findById(commentId)
-				.orElseThrow(() -> new UserExistException("Указанный комментарий не найден"));
+				.orElseThrow(() -> new CommentExistException("Указанный комментарий не найден"));
     }
 
 	private void checkUserIsNotInitiator(Long userId, Long initiatorId) {
