@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 @EqualsAndHashCode
 public class EndpointHitDto {
     @NotBlank
-    private String app;
+    private final String app = "ewm-service";
 
     @NotBlank
     private String uri;

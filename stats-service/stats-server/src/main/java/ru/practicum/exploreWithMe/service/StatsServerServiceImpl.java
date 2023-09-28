@@ -8,7 +8,6 @@ import ru.practicum.exploreWithMe.dto.*;
 import ru.practicum.exploreWithMe.exception.DateTimeValidationException;
 import ru.practicum.exploreWithMe.model.ViewStats;
 import ru.practicum.exploreWithMe.repository.StatsServerRepository;
-import ru.practicum.exploreWithMe.utils.AppDateTimeFormatter;
 import ru.practicum.exploreWithMe.utils.EndpointHitMapper;
 import ru.practicum.exploreWithMe.utils.ViewStatsMapper;
 
@@ -31,14 +30,19 @@ public class StatsServerServiceImpl implements StatsServerService {
     }
 
     @Transactional(readOnly = true)
-    public List<ViewStatsDto> getStatistic(String startStr, String endStr, String[] uris, boolean unique) {
-        log.info(SERVICE_LOG, "получение элементов статистики с параметрами:",
-                "\nstart " + startStr + "\nend " + endStr + "\nuris " + Arrays.toString(uris) + "\nunique" + unique);
-
-        LocalDateTime start = AppDateTimeFormatter.toDateTime(startStr);
-        LocalDateTime end = AppDateTimeFormatter.toDateTime(endStr);
+    public List<ViewStatsDto> getStatistic(LocalDateTime start, LocalDateTime end,
+                                           String[] incorrectUris, boolean unique) {
+        log.info(SERVICE_LOG, "получение элементов статистики с параметрами:", "\nstart " + start +
+                "\nend " + end + "\nuris " + Arrays.toString(incorrectUris) + "\nunique" + unique);
+        String[] uris;
+        if (incorrectUris != null && incorrectUris.length != 0 && incorrectUris[0].startsWith("[") &&
+                incorrectUris[0].endsWith("]")) {
+            uris = updateArray(incorrectUris);
+        } else {
+            uris = incorrectUris;
+        }
         if (start.isAfter(end)) {
-            throw new DateTimeValidationException("Дата начала не может быть выше даты окончания");
+            throw new DateTimeValidationException("Дата начала не может быть позднее даты окончания");
         }
 
         boolean isArrayExist = uris != null && uris.length != 0;
@@ -54,5 +58,16 @@ public class StatsServerServiceImpl implements StatsServerService {
             viewStatsList = statisticRepository.getStatisticIfNotUniqueAndWithArray(start, end, uris);
         }
         return viewStatsList.stream().map(ViewStatsMapper::toDto).collect(Collectors.toList());
+    }
+
+    private String[] updateArray(String[] uris) {
+        if (uris == null) {
+            return null;
+        }
+        String[] correctUris = new String[uris.length];
+        for (int i = 0; i < uris.length; i++) {
+            correctUris[i] = uris[i].substring(1, uris[i].length() - 1);
+        }
+        return correctUris;
     }
 }

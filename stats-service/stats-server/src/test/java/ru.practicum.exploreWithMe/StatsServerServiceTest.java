@@ -9,7 +9,6 @@ import ru.practicum.exploreWithMe.dto.ViewStatsDto;
 import ru.practicum.exploreWithMe.model.ViewStats;
 import ru.practicum.exploreWithMe.repository.StatsServerRepository;
 import ru.practicum.exploreWithMe.service.StatsServerServiceImpl;
-import ru.practicum.exploreWithMe.utils.AppDateTimeFormatter;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
@@ -31,8 +30,7 @@ public class StatsServerServiceTest {
         LocalDateTime end = LocalDateTime.now().plusDays(1).truncatedTo(ChronoUnit.SECONDS);;
         when(statisticRepository.getStatisticIfNotUniqueAndWithoutArray(start, end))
                 .thenReturn(List.of(new ViewStats("app", "uri", 2L)));
-        List<ViewStatsDto> viewStatsDtoList = statisticService.getStatistic(
-                AppDateTimeFormatter.toString(start), AppDateTimeFormatter.toString(end), new String[]{}, false);
+        List<ViewStatsDto> viewStatsDtoList = statisticService.getStatistic(start, end, new String[]{}, false);
         assertNotNull(viewStatsDtoList);
         assertEquals(1, viewStatsDtoList.size());
         assertEquals("app", viewStatsDtoList.get(0).getApp());
