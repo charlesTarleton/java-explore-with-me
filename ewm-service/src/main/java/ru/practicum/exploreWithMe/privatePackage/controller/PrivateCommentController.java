@@ -23,7 +23,7 @@ import static ru.practicum.exploreWithMe.commonFiles.utils.ConstantaClass.Privat
 @RequiredArgsConstructor
 @Validated
 public class PrivateCommentController {
-	private final PrivateCommentService commentService;
+    private final PrivateCommentService commentService;
 
     @GetMapping
     public List<CommentDto> getUserComments(@PathVariable("userId") Long userId,

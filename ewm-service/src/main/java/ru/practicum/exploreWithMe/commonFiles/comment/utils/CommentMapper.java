@@ -10,19 +10,18 @@ import ru.practicum.exploreWithMe.commonFiles.event.model.Event;
 import ru.practicum.exploreWithMe.commonFiles.user.model.User;
 import ru.practicum.exploreWithMe.commonFiles.user.utils.UserMapper;
 
-import java.time.LocalDateTime;
-
 @UtilityClass
 @Slf4j
 public class CommentMapper {
     public Comment toComment(NewCommentDto commentDto, User user, Event event) {
         log.info("Начата процедура преобразования нового ДТО в комментарий: {}", commentDto);
-        return new Comment(null, commentDto.getText(), user, event, LocalDateTime.now(), false);
+        return new Comment(null, commentDto.getText(), user, event, null, false);
     }
 
 	public Comment toComment(UpdateCommentDto commentDto, Comment oldComment) {
         log.info("Начата процедура преобразования измененного ДТО в комментарий: {}", commentDto);
-        return new Comment(oldComment.getId(), commentDto.getText(), oldComment.getAuthor(), oldComment.getEvent(), oldComment.getCreatedOn(), true);
+        return new Comment(oldComment.getId(), commentDto.getText(), oldComment.getAuthor(),
+                oldComment.getEvent(), oldComment.getCreatedOn(), true);
     }
 
     public CommentDto toDto(Comment comment) {

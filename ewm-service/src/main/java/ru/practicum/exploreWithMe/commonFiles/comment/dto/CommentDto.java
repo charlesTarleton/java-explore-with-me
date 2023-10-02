@@ -17,5 +17,5 @@ public class CommentDto {
 
     private Long eventId;
 
-	private Boolean edited;
+    private Boolean edited;
 }

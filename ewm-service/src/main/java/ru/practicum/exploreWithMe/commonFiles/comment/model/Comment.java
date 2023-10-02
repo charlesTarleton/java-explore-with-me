@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.CreationTimestamp;
 import ru.practicum.exploreWithMe.commonFiles.event.model.Event;
 import ru.practicum.exploreWithMe.commonFiles.user.model.User;
 
@@ -35,9 +36,10 @@ public class Comment {
     private Event event;
 
     @Column(name = "comment_created_on")
+    @CreationTimestamp
     @JsonFormat(pattern = PATTERN)
     private LocalDateTime createdOn;
 
-	@Column(name = "comment_edited")
+    @Column(name = "comment_edited")
     private Boolean edited;
 }
