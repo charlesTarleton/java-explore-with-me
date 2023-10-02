@@ -31,6 +31,6 @@ public class CommentMapper {
                 comment.getText(),
                 UserMapper.toShortDto(comment.getAuthor()),
                 comment.getEvent().getId(),
-				comment.getEdited());
+                comment.getEdited());
     }
 }

@@ -11,9 +11,9 @@ public interface PrivateCommentService {
 
     CommentDto addComment(Long userId, NewCommentDto commentDto);
 
-	CommentDto getComment(Long userId, Long commentId);
+    CommentDto getComment(Long userId, Long commentId);
 
-	CommentDto updateComment(Long userId, Long commentId, UpdateCommentDto commentDto);
+    CommentDto updateComment(Long userId, Long commentId, UpdateCommentDto commentDto);
 
-	void deleteComment(Long userId, Long commentId);
+    void deleteComment(Long userId, Long commentId);
 }

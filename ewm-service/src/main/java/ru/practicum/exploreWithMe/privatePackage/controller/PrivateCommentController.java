@@ -28,7 +28,7 @@ public class PrivateCommentController {
     @GetMapping
     public List<CommentDto> getUserComments(@PathVariable("userId") Long userId,
                                             @PositiveOrZero @RequestParam(value = "from", defaultValue = "0")
-                                            Integer from,
+                                                Integer from,
                                             @Positive @RequestParam(value = "size", defaultValue = "10")
                                                 Integer size) {
         log.info(COMMENT_CONTROLLER_LOG, "получение всех комментариев пользователя с id: ", userId);
