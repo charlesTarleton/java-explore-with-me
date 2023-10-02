@@ -10,17 +10,17 @@ import java.util.List;
 
 public interface CommentRepository extends JpaRepository<Comment, Long> {
 	@Query("SELECT c " +
-			"FROM Comment AS c " +
-			"WHERE :userId IS NULL OR c.author.id = :userId")
+		"FROM Comment AS c " +
+		"WHERE :userId IS NULL OR c.author.id = :userId")
 	List<Comment> getUserComments(@Param("userId") Long userId, Pageable pageable);
 
 	@Query("SELECT c " +
-			"FROM Comment AS c " +
-			"WHERE :eventId IS NULL OR c.event.id = :eventId")
+		"FROM Comment AS c " +
+		"WHERE :eventId IS NULL OR c.event.id = :eventId")
 	List<Comment> getEventComments(@Param("eventId") Long eventId);
 
 	@Query("SELECT c " +
-			"FROM Comment AS c " +
-			"WHERE :events IS NULL OR c.event.id IN (:events)")
+		"FROM Comment AS c " +
+		"WHERE :events IS NULL OR c.event.id IN (:events)")
 	List<Comment> getEventsComments(@Param("events") List<Long> events);
 }
