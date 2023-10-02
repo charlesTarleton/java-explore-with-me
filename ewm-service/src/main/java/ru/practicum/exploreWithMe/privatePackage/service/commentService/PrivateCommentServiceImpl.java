@@ -34,7 +34,7 @@ import static ru.practicum.exploreWithMe.commonFiles.utils.ConstantaClass.Privat
 @RequiredArgsConstructor
 @Transactional
 public class PrivateCommentServiceImpl implements PrivateCommentService {
-    private final CommentRepository commentRepository;
+	private final CommentRepository commentRepository;
 	private final UserRepository userRepository;
 	private final EventRepository eventRepository;
 
@@ -44,11 +44,11 @@ public class PrivateCommentServiceImpl implements PrivateCommentService {
 		checkUserIsExist(userId);
 		Pageable pageable = new ExploreWithMePageable(from, size, Sort.by("id").ascending());
 		return commentRepository.getUserComments(userId, pageable).stream()
-				.map(CommentMapper::toDto)
-				.collect(Collectors.toList());
+			.map(CommentMapper::toDto)
+			.collect(Collectors.toList());
 	}
 
-    public CommentDto addComment(Long userId, NewCommentDto commentDto) {
+	public CommentDto addComment(Long userId, NewCommentDto commentDto) {
 		log.info(COMMENT_SERVICE_LOG, "добавление комментария ", commentDto);
 		User user = checkUserIsExist(userId);
 		Event event = checkEventIsExist(commentDto.getEventId());
@@ -80,27 +80,27 @@ public class PrivateCommentServiceImpl implements PrivateCommentService {
 		commentRepository.deleteById(commentId);
 	}
 
-    private User checkUserIsExist(Long userId) {
-        log.info("Начата процедура проверки наличия пользователя с id: {}", userId);
+	private User checkUserIsExist(Long userId) {
+		log.info("Начата процедура проверки наличия пользователя с id: {}", userId);
 		return userRepository.findById(userId)
-				.orElseThrow(() -> new UserExistException("Указанный пользователь не найден"));
-    }
+			.orElseThrow(() -> new UserExistException("Указанный пользователь не найден"));
+	}
 
-    private Event checkEventIsExist(Long eventId) {
-        log.info("Начата процедура проверки наличия события с id: {}", eventId);
-        return eventRepository.findById(eventId)
-				.orElseThrow(() -> new EventExistException("Указанное событие не найдено"));
-    }
+	private Event checkEventIsExist(Long eventId) {
+		log.info("Начата процедура проверки наличия события с id: {}", eventId);
+		return eventRepository.findById(eventId)
+			.orElseThrow(() -> new EventExistException("Указанное событие не найдено"));
+	}
 
-    private Comment checkCommentIsExist(Long commentId) {
-        log.info("Начата процедура проверки наличия комментария с id: {}", commentId);
+	private Comment checkCommentIsExist(Long commentId) {
+		log.info("Начата процедура проверки наличия комментария с id: {}", commentId);
 		return commentRepository.findById(commentId)
-				.orElseThrow(() -> new CommentExistException("Указанный комментарий не найден"));
-    }
+			.orElseThrow(() -> new CommentExistException("Указанный комментарий не найден"));
+	}
 
 	private void checkUserIsNotInitiator(Long userId, Long initiatorId) {
 		log.info("Начата процедура проверки несоответствия автора комментария {} и инициатора события {}",
-				userId, initiatorId);
+			userId, initiatorId);
 		if (userId.equals(initiatorId)) {
 			throw new CommentAuthorException("Инициатор события не может оставлять комментарии к своему событию");
 		}
@@ -108,16 +108,16 @@ public class PrivateCommentServiceImpl implements PrivateCommentService {
 
 	private void checkUserIsCommentAuthor(Long userId, Long authorId) {
 		log.info("Начата процедура проверки соответствия пользователя {} и автора комментария {}",
-				userId, authorId);
+			userId, authorId);
 		if (!userId.equals(authorId)) {
 			throw new CommentAuthorException("Изменять или удалять комментарий может только пользователь, " +
-					"его написавший");
+				"его написавший");
 		}
 	}
 
 	private void checkEventIsPublished(Event event) {
-        if (!event.getStateAction().equals(EventState.PUBLISHED)) {
-            throw new EventNotPublicisedException("Указанное событие не опубликовано");
-        }
-    }
+		if (!event.getStateAction().equals(EventState.PUBLISHED)) {
+			throw new EventNotPublicisedException("Указанное событие не опубликовано");
+		}
+	}
 }
