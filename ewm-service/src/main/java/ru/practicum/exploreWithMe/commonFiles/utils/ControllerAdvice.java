@@ -46,7 +46,7 @@ public class ControllerAdvice {
     @ExceptionHandler({EventLimitException.class, EventNotPublicisedException.class,
             EventUpdateStateException.class, RequestChangeNotPendingStatusException.class,
             RequestRepeatException.class, UserIsNotEventInitiatorException.class, UserIsNotRequesterException.class,
-            DataIntegrityViolationException.class})
+            DataIntegrityViolationException.class, CommentAuthorException.class})
     @ResponseStatus(HttpStatus.CONFLICT)
     public ApiError fourHundredNineErrorHandle(final Exception exception) {
         log.warn(ERROR_409, exception);

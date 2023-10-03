@@ -18,6 +18,7 @@ import ru.practicum.exploreWithMe.publicPackage.service.eventService.PublicEvent
 import javax.servlet.http.HttpServletRequest;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
@@ -43,7 +44,7 @@ public class PublicEventControllerTest {
         EventFullDto eventDto = new EventFullDto(
                 new EventShortDto("Аннотация", new CategoryDto(), 2L,
                         LocalDateTime.now().plusDays(2), 3L, new UserShortDto(), true,
-                        "Заголовок события", 11),
+                        "Заголовок события", 11, List.of()),
                 LocalDateTime.now().minusDays(1), "Описание", new LocationDto(),
                 10L, LocalDateTime.now(), true, EventState.PUBLISHED);
 

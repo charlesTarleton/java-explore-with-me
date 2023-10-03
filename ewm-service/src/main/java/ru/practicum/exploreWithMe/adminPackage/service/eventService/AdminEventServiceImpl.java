@@ -7,6 +7,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.exploreWithMe.commonFiles.category.model.Category;
 import ru.practicum.exploreWithMe.commonFiles.category.repository.CategoryRepository;
+import ru.practicum.exploreWithMe.commonFiles.comment.dto.CommentDto;
+import ru.practicum.exploreWithMe.commonFiles.comment.repository.CommentRepository;
+import ru.practicum.exploreWithMe.commonFiles.comment.utils.CommentMapper;
 import ru.practicum.exploreWithMe.commonFiles.event.dto.EventFullDto;
 import ru.practicum.exploreWithMe.commonFiles.event.dto.LocationDto;
 import ru.practicum.exploreWithMe.commonFiles.event.dto.UpdateEventAdminRequest;
@@ -26,10 +29,7 @@ import ru.practicum.exploreWithMe.commonFiles.exception.fourHundredFour.EventExi
 import ru.practicum.exploreWithMe.commonFiles.utils.ExploreWithMePageable;
 
 import java.time.LocalDateTime;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -44,6 +44,7 @@ public class AdminEventServiceImpl implements AdminEventService {
     private final EventRepository eventRepository;
     private final CategoryRepository categoryRepository;
     private final LocationRepository locationRepository;
+    private final CommentRepository commentRepository;
 
     @Transactional(readOnly = true)
     public List<EventFullDto> getEventsWithSettings(Long[] users, String[] states, Long[] categories,
@@ -67,6 +68,12 @@ public class AdminEventServiceImpl implements AdminEventService {
         checkSearchDateTime(rangeStart, rangeEnd);
         List<Event> eventList = eventRepository.getEventsWithSettings(usersSet, statesSet, categoriesSet,
                 new ExploreWithMePageable(from, size, Sort.unsorted()));
+        List<Long> eventIdList = eventList.stream()
+                .map(Event::getId)
+                .collect(Collectors.toList());
+        Map<Long, List<CommentDto>> commentMap = commentRepository.getEventsComments(eventIdList).stream()
+                .map(CommentMapper::toDto)
+                .collect(Collectors.groupingBy(CommentDto::getEventId));
         Stream<Event> eventStream;
         if (rangeStart != null && rangeEnd != null) {
             eventStream = eventList.stream().filter(event -> event.getEventDate().isAfter(rangeStart)
@@ -78,7 +85,9 @@ public class AdminEventServiceImpl implements AdminEventService {
         } else {
             eventStream = eventList.stream();
         }
-        return eventStream.map(EventMapper::toFullDto).collect(Collectors.toList());
+        return eventStream
+                .map(event -> EventMapper.toFullDto(event, commentMap.get(event.getId())))
+                .collect(Collectors.toList());
     }
 
     public EventFullDto updateEvent(Long eventId, UpdateEventAdminRequest eventDto) {
@@ -115,7 +124,10 @@ public class AdminEventServiceImpl implements AdminEventService {
         } else {
             event = EventMapper.toEvent(eventId, category, eventDto, oldEvent, location, EventState.REJECTED);
         }
-        return EventMapper.toFullDto(eventRepository.save(event));
+        List<CommentDto> commentDtoList = commentRepository.getEventComments(eventId).stream()
+                .map(CommentMapper::toDto)
+                .collect(Collectors.toList());
+        return EventMapper.toFullDto(eventRepository.save(event), commentDtoList);
     }
 
     private Category checkCategoryIsExist(Long categoryId) {

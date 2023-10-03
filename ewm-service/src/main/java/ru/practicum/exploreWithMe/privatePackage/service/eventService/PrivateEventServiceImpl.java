@@ -7,6 +7,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.exploreWithMe.commonFiles.category.model.Category;
 import ru.practicum.exploreWithMe.commonFiles.category.repository.CategoryRepository;
+import ru.practicum.exploreWithMe.commonFiles.comment.dto.CommentDto;
+import ru.practicum.exploreWithMe.commonFiles.comment.repository.CommentRepository;
+import ru.practicum.exploreWithMe.commonFiles.comment.utils.CommentMapper;
 import ru.practicum.exploreWithMe.commonFiles.event.dto.*;
 import ru.practicum.exploreWithMe.commonFiles.event.model.Event;
 import ru.practicum.exploreWithMe.commonFiles.event.model.Location;
@@ -34,6 +37,7 @@ import ru.practicum.exploreWithMe.commonFiles.utils.ExploreWithMePageable;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -50,13 +54,21 @@ public class PrivateEventServiceImpl implements PrivateEventService {
     private final RequestRepository requestRepository;
     private final CategoryRepository categoryRepository;
     private final LocationRepository locationRepository;
+    private final CommentRepository commentRepository;
 
     @Transactional(readOnly = true)
     public List<EventShortDto> getUserEvents(Long userId, Integer from, Integer size) {
         log.info(EVENT_SERVICE_LOG, "получение событий, добавленных пользователем с id: ", userId);
         checkUserIsExist(userId);
-        return eventRepository.getUserEvents(userId, new ExploreWithMePageable(from, size, Sort.unsorted())).stream()
-                .map(EventMapper::toShortDto)
+        List<Event> eventList = eventRepository
+                .getUserEvents(userId, new ExploreWithMePageable(from, size, Sort.unsorted()));
+        Map<Long, List<CommentDto>> commentMap = commentRepository.getEventsComments(eventList.stream()
+                        .map(Event::getId)
+                        .collect(Collectors.toList())).stream()
+                .map(CommentMapper::toDto)
+                .collect(Collectors.groupingBy(CommentDto::getEventId));
+        return eventList.stream()
+                .map(event -> EventMapper.toShortDto(event, commentMap.get(event.getId())))
                 .collect(Collectors.toList());
     }
 
@@ -68,7 +80,7 @@ public class PrivateEventServiceImpl implements PrivateEventService {
         Location location = checkLocationIsExist(eventDto.getLocation());
         Event event = EventMapper
                 .toEvent(null, category, eventDto, 0L, user, location, 0);
-        return EventMapper.toFullDto(eventRepository.save(event));
+        return EventMapper.toFullDto(eventRepository.save(event), List.of());
     }
 
     @Transactional(readOnly = true)
@@ -77,7 +89,10 @@ public class PrivateEventServiceImpl implements PrivateEventService {
         checkUserIsExist(userId);
         Event event = checkEventIsExist(eventId);
         checkUserIsEventInitiator(userId, event.getInitiator().getId());
-        return EventMapper.toFullDto(event);
+        List<CommentDto> commentDtoList = commentRepository.getEventComments(eventId).stream()
+                .map(CommentMapper::toDto)
+                .collect(Collectors.toList());
+        return EventMapper.toFullDto(event, commentDtoList);
     }
 
     public EventFullDto updateEvent(Long userId, Long eventId, UpdateEventUserRequest eventDto) {
@@ -110,7 +125,10 @@ public class PrivateEventServiceImpl implements PrivateEventService {
             event = EventMapper.toEvent(eventId, category, eventDto, user, location,
                     oldEvent.getStateAction(), oldEvent);
         }
-        return EventMapper.toFullDto(eventRepository.save(event));
+        List<CommentDto> commentDtoList = commentRepository.getEventComments(eventId).stream()
+                .map(CommentMapper::toDto)
+                .collect(Collectors.toList());
+        return EventMapper.toFullDto(eventRepository.save(event), commentDtoList);
     }
 
     @Transactional(readOnly = true)

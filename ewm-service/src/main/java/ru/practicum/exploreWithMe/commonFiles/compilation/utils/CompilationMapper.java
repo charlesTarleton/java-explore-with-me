@@ -2,6 +2,7 @@ package ru.practicum.exploreWithMe.commonFiles.compilation.utils;
 
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
+import ru.practicum.exploreWithMe.commonFiles.comment.dto.CommentDto;
 import ru.practicum.exploreWithMe.commonFiles.compilation.dto.CompilationDto;
 import ru.practicum.exploreWithMe.commonFiles.compilation.dto.NewCompilationDto;
 import ru.practicum.exploreWithMe.commonFiles.compilation.dto.UpdateCompilationRequest;
@@ -9,6 +10,8 @@ import ru.practicum.exploreWithMe.commonFiles.compilation.model.Compilation;
 import ru.practicum.exploreWithMe.commonFiles.event.model.Event;
 import ru.practicum.exploreWithMe.commonFiles.event.utils.EventMapper;
 
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -23,11 +26,11 @@ public class CompilationMapper {
         return new Compilation(null, compilationDto.getPinned(), compilationDto.getTitle(), eventList);
     }
 
-    public CompilationDto toDto(Compilation compilation) {
+    public CompilationDto toDto(Compilation compilation, Map<Long, List<CommentDto>> commentMap) {
         log.info("Начата процедура преобразования подборки в ДТО: {}", compilation);
         return new CompilationDto(
                 compilation.getEvents().stream()
-                        .map(EventMapper::toShortDto)
+                        .map(event -> EventMapper.toShortDto(event, commentMap.get(event.getId())))
                         .collect(Collectors.toList()),
                 compilation.getId(),
                 compilation.getPinned(),

@@ -19,8 +19,10 @@ public final class ConstantaClass {
         private static final String END = "получил запрос на {}{}";
         public static final String REQUEST_CONTROLLER_LOG = START + "контроллер запросов " + END;
         public static final String EVENT_CONTROLLER_LOG = START + "контроллер событий " + END;
+        public static final String COMMENT_CONTROLLER_LOG = START + "контроллер комментариев " + END;
         public static final String REQUEST_SERVICE_LOG = START + "сервис запросов " + END;
         public static final String EVENT_SERVICE_LOG = START + "сервис событий " + END;
+        public static final String COMMENT_SERVICE_LOG = START + "сервис комментариев " + END;
         public static final byte REQUIREMENT_HOURS_COUNT = 2;
     }
 
